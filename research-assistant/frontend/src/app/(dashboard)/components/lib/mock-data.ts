@@ -1,0 +1,817 @@
+import type {
+  ResearchProject,
+  Paper,
+  Evidence,
+  ContradictionClaim,
+  ResearchGap,
+  Opportunity,
+  Hypothesis,
+  RoadmapStep,
+  ReportSection,
+  Collection,
+  TrendSeries,
+  GraphNode,
+  GraphEdge,
+  AssistantMessage,
+  ProcessingStep,
+} from './types';
+
+export const projects: ResearchProject[] = [
+  {
+    id: 'agentic-rag',
+    title: 'Future of Agentic RAG',
+    question:
+      'How is retrieval-augmented generation evolving toward autonomous research agents?',
+    description:
+      'Tracking the convergence of retrieval-augmented generation, persistent memory, and autonomous agent architectures. Investigating how self-reflection, tool use, and multi-step reasoning reshape evidence gathering.',
+    paperCount: 428,
+    evidenceCount: 1842,
+    topicCount: 37,
+    updatedAt: '12m ago',
+    topics: ['RAG', 'Agents', 'Memory', 'Retrieval', 'Self-reflection'],
+    status: 'active',
+    signals: [
+      { label: 'Agentic Retrieval', change: 47, direction: 'up' },
+      { label: 'Persistent Memory', change: 52, direction: 'up' },
+      { label: 'Multimodal Agents', change: 28, direction: 'up' },
+      { label: 'Tool-augmented RAG', change: 34, direction: 'up' },
+      { label: 'Self-reflection', change: 19, direction: 'up' },
+      { label: 'Static Retrieval', change: -12, direction: 'down' },
+    ],
+    recentDiscoveries: [
+      { type: 'connection', count: 3, description: 'emerging connections between persistent memory and agentic retrieval' },
+      { type: 'contradiction', count: 2, description: 'contradictions on context length effects' },
+      { type: 'opportunity', count: 5, description: 'research opportunities in multimodal memory' },
+    ],
+    frontier: [
+      {
+        name: 'Self-Evolving Retrieval Systems',
+        momentum: 86,
+        convergence: 78,
+        novelty: 79,
+        forecast: 'high',
+        confidence: 'high',
+        reasons: ['Citation velocity', 'Publication growth', 'Emerging terminology', 'Cross-topic convergence'],
+        supportingEvidence: 142,
+        counterSignals: 18,
+        relevantPapers: 67,
+      },
+      {
+        name: 'Persistent Multimodal Memory',
+        momentum: 74,
+        convergence: 69,
+        novelty: 91,
+        forecast: 'high',
+        confidence: 'medium',
+        reasons: ['Cross-topic convergence', 'Emerging terminology', 'Publication growth'],
+        supportingEvidence: 88,
+        counterSignals: 9,
+        relevantPapers: 41,
+      },
+      {
+        name: 'Autonomous Evidence Verification',
+        momentum: 63,
+        convergence: 55,
+        novelty: 72,
+        forecast: 'medium',
+        confidence: 'medium',
+        reasons: ['Citation velocity', 'Emerging terminology'],
+        supportingEvidence: 54,
+        counterSignals: 12,
+        relevantPapers: 29,
+      },
+    ],
+  },
+  {
+    id: 'mechanistic-interp',
+    title: 'Mechanistic Interpretability',
+    question: 'How do large language models represent and compose concepts internally?',
+    description:
+      'Investigating circuit-level analysis of transformer models, sparse autoencoders, and feature dictionary learning.',
+    paperCount: 312,
+    evidenceCount: 967,
+    topicCount: 24,
+    updatedAt: '2h ago',
+    topics: ['Interpretability', 'Circuits', 'Sparse Autoencoders', 'Features'],
+    status: 'active',
+    signals: [
+      { label: 'Sparse Autoencoders', change: 61, direction: 'up' },
+      { label: 'Feature Dictionary', change: 44, direction: 'up' },
+      { label: 'Circuit Analysis', change: 22, direction: 'up' },
+    ],
+    recentDiscoveries: [
+      { type: 'connection', count: 2, description: 'connections between feature splitting and model scale' },
+      { type: 'opportunity', count: 4, description: 'opportunities in cross-model feature transfer' },
+    ],
+    frontier: [
+      {
+        name: 'Universal Feature Transfer',
+        momentum: 71,
+        convergence: 66,
+        novelty: 84,
+        forecast: 'high',
+        confidence: 'medium',
+        reasons: ['Cross-topic convergence', 'Publication growth'],
+        supportingEvidence: 61,
+        counterSignals: 14,
+        relevantPapers: 33,
+      },
+    ],
+  },
+  {
+    id: 'test-time-compute',
+    title: 'Test-Time Compute Scaling',
+    question: 'Does scaling inference-time computation reliably improve reasoning?',
+    description:
+      'Examining the relationship between inference-time search, verification, and reasoning quality across model scales.',
+    paperCount: 187,
+    evidenceCount: 524,
+    topicCount: 18,
+    updatedAt: '1d ago',
+    topics: ['Test-time', 'Reasoning', 'Verification', 'Search'],
+    status: 'active',
+    signals: [
+      { label: 'Process Reward Models', change: 58, direction: 'up' },
+      { label: 'Tree Search', change: 31, direction: 'up' },
+      { label: 'Self-verification', change: 47, direction: 'up' },
+    ],
+    recentDiscoveries: [
+      { type: 'contradiction', count: 3, description: 'contradictions on diminishing returns' },
+      { type: 'opportunity', count: 2, description: 'opportunities in verifier scaling' },
+    ],
+    frontier: [
+      {
+        name: 'Verifier-Reasoner Co-scaling',
+        momentum: 68,
+        convergence: 51,
+        novelty: 76,
+        forecast: 'medium',
+        confidence: 'medium',
+        reasons: ['Citation velocity', 'Publication growth', 'Emerging terminology'],
+        supportingEvidence: 47,
+        counterSignals: 16,
+        relevantPapers: 24,
+      },
+    ],
+  },
+];
+
+export const papers: Paper[] = [
+  {
+    id: 'p-001',
+    title: 'Self-RAG: Learning to Retrieve, Generate, and Critique through Self-Reflection',
+    authors: ['Asai, A.', 'Wu, Z.', 'Wang, Y.', 'Sil, A.', 'Hajishirzi, H.'],
+    venue: 'TACL',
+    year: 2024,
+    abstract:
+      'Retrieval-augmented generation with self-reflection mechanisms that adaptively retrieve passages and critique own outputs through reflection tokens.',
+    tags: ['RAG', 'Retrieval', 'Self-reflection'],
+    citations: 482,
+    doi: '10.1162/tacl_a_00605',
+    method: 'Self-reflection tokens',
+    dataset: '5 datasets',
+    relevance: 0.94,
+    addedAt: '3d ago',
+  },
+  {
+    id: 'p-002',
+    title: 'CRAG: Corrective Retrieval Augmented Generation',
+    authors: ['Yan, S.', 'Guo, J.', 'Lan, Y.', 'Cheng, P.'],
+    venue: 'EMNLP',
+    year: 2024,
+    abstract:
+      'A lightweight retrieval refiner that assesses retrieval quality and triggers corrective actions to improve robustness of RAG.',
+    tags: ['RAG', 'Retrieval', 'Correction'],
+    citations: 167,
+    method: 'Retrieval refiner',
+    dataset: '4 datasets',
+    relevance: 0.88,
+    addedAt: '5d ago',
+  },
+  {
+    id: 'p-003',
+    title: 'ReAct: Synergizing Reasoning and Acting in Language Models',
+    authors: ['Yao, S.', 'Zhao, J.', 'Yu, D.', 'Du, N.', 'Shafran, I.', 'Narasimhan, K.'],
+    venue: 'ICLR',
+    year: 2023,
+    abstract:
+      'Interleaving reasoning traces and actions to enable language models to interact with external tools and environments.',
+    tags: ['Agents', 'Reasoning', 'Tool use'],
+    citations: 1204,
+    method: 'Reasoning-acting trace',
+    dataset: 'ALFWorld, WebShop',
+    relevance: 0.91,
+    addedAt: '1w ago',
+  },
+  {
+    id: 'p-004',
+    title: 'Reflexion: Language Agents with Verbal Reinforcement Learning',
+    authors: ['Shinn, N.', 'Cassano, F.', 'Berman, E.', 'Gopinath, A.', 'Naradowsky, J.', 'Yao, S.'],
+    venue: 'NeurIPS',
+    year: 2023,
+    abstract:
+      'Agents that verbally reflect on task feedback and store reflective text in episodic memory to improve decision-making.',
+    tags: ['Agents', 'Memory', 'Reflection'],
+    citations: 389,
+    method: 'Verbal reflection',
+    dataset: 'AlfWorld, HotpotQA',
+    relevance: 0.86,
+    addedAt: '1w ago',
+  },
+  {
+    id: 'p-005',
+    title: 'MemGPT: Towards LLMs as Operating Systems',
+    authors: ['Packer, C.', 'Wooders, S.', 'Lin, K.', 'Fang, M.', 'Tiwary, S.'],
+    venue: 'arXiv',
+    year: 2024,
+    abstract:
+      'Treats context window as virtual memory with paging between main and external context, enabling long conversations and document analysis.',
+    tags: ['Memory', 'Context', 'Agents'],
+    citations: 214,
+    method: 'Memory paging',
+    dataset: 'Custom',
+    relevance: 0.83,
+    addedAt: '2w ago',
+  },
+  {
+    id: 'p-006',
+    title: 'Toolformer: Language Models Can Teach Themselves to Use Tools',
+    authors: ['Schick, T.', 'Dwivedi-Yu, J.', 'Dessi, R.', 'Raileanu, R.', 'et al.'],
+    venue: 'NeurIPS',
+    year: 2023,
+    abstract:
+      'Language models that self-supervise tool use by inserting API calls into text during pretraining.',
+    tags: ['Tool use', 'Agents'],
+    citations: 567,
+    method: 'Self-supervised API calls',
+    dataset: 'CC-News, Pile',
+    relevance: 0.79,
+    addedAt: '2w ago',
+  },
+  {
+    id: 'p-007',
+    title: 'RAP: Reasoning via Planning with Language Models',
+    authors: ['Hao, S.', 'Gunasekar, S.', 'Najork, M.'],
+    venue: 'arXiv',
+    year: 2023,
+    abstract:
+      'Combines language model reasoning with Monte Carlo Tree Search for planning-based reasoning.',
+    tags: ['Reasoning', 'Search', 'Planning'],
+    citations: 198,
+    method: 'MCTS planning',
+    dataset: 'Blocksworld, GSM8K',
+    relevance: 0.81,
+    addedAt: '3w ago',
+  },
+  {
+    id: 'p-008',
+    title: 'LongRAG: Enhancing Retrieval-Augmented Generation with Long Context',
+    authors: ['Jiang, Z.', 'Xu, F.', 'Gao, L.', 'Sun, Z.', 'Liu, Q.'],
+    venue: 'arXiv',
+    year: 2024,
+    abstract:
+      'Processes long documents with extended context windows to reduce fragmentation in retrieval.',
+    tags: ['RAG', 'Long context', 'Retrieval'],
+    citations: 73,
+    method: 'Long-context processing',
+    dataset: 'Natural Questions',
+    relevance: 0.76,
+    addedAt: '3w ago',
+  },
+  {
+    id: 'p-009',
+    title: 'Active Retrieval Augmented Generation',
+    authors: ['Jiang, Z.', 'Xu, F.', 'Araki, J.'],
+    venue: 'EMNLP',
+    year: 2023,
+    abstract:
+      'Improves RAG by actively deciding when to retrieve based on generation confidence.',
+    tags: ['RAG', 'Active retrieval', 'Confidence'],
+    citations: 156,
+    method: 'Confidence-based retrieval',
+    dataset: '6 QA datasets',
+    relevance: 0.84,
+    addedAt: '4w ago',
+  },
+  {
+    id: 'p-010',
+    title: 'Chain-of-Note: Enhancing Robustness in Retrieval Augmented Generation',
+    authors: ['Yu, Z.', 'Xu, A.', 'Shi, J.'],
+    venue: 'arXiv',
+    year: 2023,
+    abstract:
+      'Generates reading notes for retrieved passages to improve robustness against irrelevant documents.',
+    tags: ['RAG', 'Robustness', 'Notes'],
+    citations: 89,
+    method: 'Note generation',
+    dataset: 'NQ, TriviaQA',
+    relevance: 0.72,
+    addedAt: '1mo ago',
+  },
+];
+
+export const evidence: Evidence[] = [
+  {
+    id: 'E-1842',
+    quote: 'Self-RAG improves retrieval decisions by generating reflection tokens that assess retrieval necessity and relevance.',
+    paperId: 'p-001',
+    paperTitle: 'Self-RAG',
+    section: 'Section 4.2',
+    page: 7,
+    relevance: 0.94,
+    category: 'primary',
+    trustCategory: 'evidence',
+  },
+  {
+    id: 'E-1841',
+    quote: 'Agents that maintain episodic memory of past reflections show 22% improvement on multi-step reasoning tasks.',
+    paperId: 'p-004',
+    paperTitle: 'Reflexion',
+    section: 'Section 3.1',
+    page: 5,
+    relevance: 0.89,
+    category: 'primary',
+    trustCategory: 'evidence',
+  },
+  {
+    id: 'E-1840',
+    quote: 'Memory paging between main and external context enables coherent conversations exceeding 100k tokens.',
+    paperId: 'p-005',
+    paperTitle: 'MemGPT',
+    section: 'Section 5',
+    page: 11,
+    relevance: 0.81,
+    category: 'primary',
+    trustCategory: 'evidence',
+  },
+  {
+    id: 'E-1839',
+    quote: 'Active retrieval triggered by low generation confidence reduces hallucination by 14% on open-domain QA.',
+    paperId: 'p-009',
+    paperTitle: 'Active RAG',
+    section: 'Section 4',
+    page: 8,
+    relevance: 0.86,
+    category: 'primary',
+    trustCategory: 'evidence',
+  },
+  {
+    id: 'E-1838',
+    quote: 'Corrective retrieval refiners improve downstream generation quality even when initial retrieval is noisy.',
+    paperId: 'p-002',
+    paperTitle: 'CRAG',
+    section: 'Section 3.3',
+    page: 6,
+    relevance: 0.82,
+    category: 'secondary',
+    trustCategory: 'evidence',
+  },
+  {
+    id: 'E-1837',
+    quote: 'Interleaving reasoning and acting enables language models to ground plans in environmental feedback.',
+    paperId: 'p-003',
+    paperTitle: 'ReAct',
+    section: 'Section 2',
+    page: 4,
+    relevance: 0.88,
+    category: 'primary',
+    trustCategory: 'evidence',
+  },
+  {
+    id: 'E-1836',
+    quote: 'Long-context processing reduces retrieval fragmentation but does not eliminate the need for retrieval.',
+    paperId: 'p-008',
+    paperTitle: 'LongRAG',
+    section: 'Section 6',
+    page: 13,
+    relevance: 0.71,
+    category: 'contextual',
+    trustCategory: 'evidence',
+  },
+  {
+    id: 'E-1835',
+    quote: 'Generating reading notes for retrieved passages mitigates the impact of irrelevant documents on generation.',
+    paperId: 'p-010',
+    paperTitle: 'Chain-of-Note',
+    section: 'Section 4.1',
+    page: 7,
+    relevance: 0.74,
+    category: 'secondary',
+    trustCategory: 'evidence',
+  },
+];
+
+export const contradictions: ContradictionClaim[] = [
+  {
+    claim: 'Longer context windows reduce the need for retrieval in RAG.',
+    supporting: 12,
+    contradicting: 5,
+    qualifying: 7,
+    reasons: [
+      'Dataset differences — some benchmarks favor retrieval, others favor long context',
+      'Model differences — larger models use context more effectively',
+      'Evaluation differences — open-domain vs multi-hop QA behave differently',
+      'Methodological differences — retrieval quality varies across implementations',
+    ],
+    papers: [
+      { title: 'LongRAG', stance: 'support', note: 'Long context reduces fragmentation' },
+      { title: 'Self-RAG', stance: 'contradict', note: 'Retrieval remains necessary for precision' },
+      { title: 'Active RAG', stance: 'qualify', note: 'Depends on query complexity' },
+      { title: 'Chain-of-Note', stance: 'support', note: 'Notes improve long-context robustness' },
+      { title: 'CRAG', stance: 'contradict', note: 'Retrieval correction still needed' },
+    ],
+  },
+  {
+    claim: 'Self-reflection improves agent performance on multi-step tasks.',
+    supporting: 18,
+    contradicting: 2,
+    qualifying: 4,
+    reasons: [
+      'Task complexity — reflection helps more on harder tasks',
+      'Feedback granularity — verbal reflection needs clear signals',
+      'Model capacity — smaller models benefit less from reflection',
+    ],
+    papers: [
+      { title: 'Reflexion', stance: 'support', note: '22% improvement on multi-step' },
+      { title: 'Self-RAG', stance: 'support', note: 'Reflection tokens improve retrieval' },
+      { title: 'ReAct', stance: 'qualify', note: 'Reasoning-acting balance matters' },
+    ],
+  },
+];
+
+export const gaps: ResearchGap[] = [
+  {
+    id: 'g-001',
+    combination: ['RAG', 'Persistent Memory', 'Multimodal Agents'],
+    relatedPapers: 27,
+    density: 'low',
+    opportunity: 'high',
+    observed: true,
+    description: 'Few systems combine retrieval, persistent memory, and multimodal perception. The intersection is largely unexplored despite each component being mature individually.',
+  },
+  {
+    id: 'g-002',
+    combination: ['Self-reflection', 'Tool use', 'Long-horizon planning'],
+    relatedPapers: 19,
+    density: 'low',
+    opportunity: 'high',
+    observed: true,
+    description: 'Self-reflective agents that plan over long horizons while using tools remain an open problem. Current systems handle short horizons.',
+  },
+  {
+    id: 'g-003',
+    combination: ['Sparse autoencoders', 'Retrieval features'],
+    relatedPapers: 8,
+    density: 'low',
+    opportunity: 'medium',
+    observed: false,
+    description: 'Inferred gap: interpretability work on retrieval-specific features is sparse. Could enable better retrieval understanding.',
+  },
+  {
+    id: 'g-004',
+    combination: ['Test-time search', 'Evidence verification'],
+    relatedPapers: 14,
+    density: 'medium',
+    opportunity: 'medium',
+    observed: true,
+    description: 'Search-based reasoning rarely verifies intermediate evidence. Combining process reward models with evidence checking is emerging.',
+  },
+];
+
+export const opportunities: Opportunity[] = [
+  {
+    id: 'o-001',
+    title: 'Persistent Multimodal Memory for Research Agents',
+    subtitle: 'Combining retrieval, episodic memory, and multimodal perception',
+    novelty: 94,
+    momentum: 82,
+    competition: 48,
+    difficulty: 79,
+    relatedPapers: 27,
+    recentGrowth: 63,
+  },
+  {
+    id: 'o-002',
+    title: 'Self-Evolving Retrieval Policies',
+    subtitle: 'Retrieval systems that improve from interaction history',
+    novelty: 88,
+    momentum: 76,
+    competition: 41,
+    difficulty: 71,
+    relatedPapers: 34,
+    recentGrowth: 51,
+  },
+  {
+    id: 'o-003',
+    title: 'Verifier-Reasoner Co-scaling',
+    subtitle: 'Jointly scaling process verifiers and reasoners',
+    novelty: 79,
+    momentum: 68,
+    competition: 55,
+    difficulty: 66,
+    relatedPapers: 24,
+    recentGrowth: 44,
+  },
+  {
+    id: 'o-004',
+    title: 'Evidence-Aware Test-Time Search',
+    subtitle: 'Search that verifies intermediate reasoning steps against sources',
+    novelty: 81,
+    momentum: 61,
+    competition: 38,
+    difficulty: 73,
+    relatedPapers: 19,
+    recentGrowth: 39,
+  },
+];
+
+export const hypotheses: Hypothesis[] = [
+  {
+    id: 'h-001',
+    statement:
+      'Persistent multimodal memory improves long-horizon agent performance compared with retrieval-only architectures.',
+    evidence: 'Episodic memory shows 22% gains (Reflexion). Memory paging enables 100k+ context (MemGPT). Multimodal agents show 28% growth.',
+    gap: 'RAG + Persistent Memory + Multimodal Agents — 27 papers, low density, high opportunity',
+    whyItMatters:
+      'Current agents lose context over long horizons. Persistent memory could enable sustained research workflows.',
+    potentialContribution:
+      'A unified architecture combining retrieval, episodic memory, and multimodal perception for long-horizon reasoning.',
+    method: 'Architecture comparison: retrieval-only vs memory-augmented vs combined, on multi-step research tasks',
+    dataset: 'Custom multi-hop research QA + existing (HotpotQA, AlfWorld, MuTaL)',
+    baseline: 'RAG-only agent, Reflexion agent, MemGPT agent',
+    metrics: ['Task completion rate', 'Context retention', 'Evidence accuracy', 'Hallucination rate'],
+    status: 'draft',
+  },
+  {
+    id: 'h-002',
+    statement:
+      'Self-evolving retrieval policies that learn from interaction history outperform fixed retrieval strategies on open-domain research questions.',
+    evidence: 'Active retrieval reduces hallucination 14%. Self-RAG reflection tokens improve retrieval decisions. No system yet learns retrieval policy from history.',
+    gap: 'Self-reflection + Tool use + Long-horizon planning — 19 papers, low density',
+    whyItMatters:
+      'Fixed retrieval strategies cannot adapt to shifting research landscapes. Learned policies could improve over time.',
+    potentialContribution:
+      'A retrieval policy that updates from past retrieval outcomes, improving precision on recurring research topics.',
+    method: 'Online learning of retrieval policy via retrieval outcome signals',
+    dataset: 'Open-domain research QA with temporal split',
+    baseline: 'Fixed BM25, fixed dense retrieval, Self-RAG',
+    metrics: ['Retrieval precision@k', 'Answer accuracy', 'Retrieval cost', 'Adaptation speed'],
+    status: 'testing',
+  },
+];
+
+export const roadmapSteps: RoadmapStep[] = [
+  { id: 'r1', label: 'Research Gap', value: 'Persistent multimodal memory for research agents', type: 'gap' },
+  { id: 'r2', label: 'Research Question', value: 'Does persistent multimodal memory improve long-horizon agent performance?', type: 'question' },
+  { id: 'r3', label: 'Hypothesis', value: 'Persistent multimodal memory improves long-horizon performance vs retrieval-only', type: 'hypothesis' },
+  { id: 'r4', label: 'Methodology', value: 'Architecture comparison across three conditions', type: 'methodology' },
+  { id: 'r5', label: 'Dataset', value: 'Multi-hop research QA + AlfWorld + MuTaL', type: 'dataset' },
+  { id: 'r6', label: 'Baseline', value: 'RAG-only, Reflexion, MemGPT agents', type: 'baseline' },
+  { id: 'r7', label: 'Experiment', value: 'Run 3 conditions × 5 task families × 3 seeds', type: 'experiment' },
+  { id: 'r8', label: 'Evaluation', value: 'Completion rate, context retention, evidence accuracy, hallucination', type: 'evaluation' },
+  { id: 'r9', label: 'Contribution', value: 'Unified memory-retrieval architecture for long-horizon research agents', type: 'contribution' },
+];
+
+export const reportSections: ReportSection[] = [
+  {
+    id: 's1',
+    title: 'Executive Summary',
+    content: 'Retrieval-augmented generation is evolving from static retrieval toward autonomous, self-reflective agents with persistent memory. 428 papers and 1,842 evidence units reveal a clear trajectory: retrieval is becoming adaptive, memory is becoming persistent, and agents are gaining the ability to verify their own reasoning. Three frontier directions emerge with high momentum: self-evolving retrieval, persistent multimodal memory, and autonomous evidence verification.',
+  },
+  {
+    id: 's2',
+    title: 'Research Problem',
+    content: 'How is retrieval-augmented generation evolving toward autonomous research agents? The field sits at the intersection of retrieval, reasoning, memory, and agency. Understanding this convergence is critical for building systems that can conduct sustained research workflows.',
+  },
+  {
+    id: 's3',
+    title: 'Literature',
+    content: 'The literature spans four generations: (1) static RAG with fixed retrieval, (2) active RAG with confidence-based retrieval, (3) self-reflective RAG with critique tokens, and (4) agentic RAG with tool use and memory. 428 papers cluster around 37 topics, with the fastest growth in agentic retrieval and persistent memory.',
+  },
+  {
+    id: 's4',
+    title: 'Major Approaches',
+    content: 'Self-reflective retrieval (Self-RAG, CRAG), memory-augmented agents (Reflexion, MemGPT), tool-using agents (ReAct, Toolformer), and search-based reasoning (RAP). Each addresses a different limitation: retrieval quality, context retention, grounding, and planning.',
+  },
+  {
+    id: 's5',
+    title: 'Evidence',
+    content: '1,842 evidence units across 428 papers. Primary results show self-reflection improves retrieval decisions (relevance 0.94), episodic memory improves multi-step reasoning by 22%, and memory paging enables 100k+ token coherence.',
+  },
+  {
+    id: 's6',
+    title: 'Contradictions',
+    content: 'Two major disagreements: (1) whether longer context reduces the need for retrieval — 12 supporting, 5 contradicting, 7 qualifying, driven by dataset and evaluation differences. (2) the magnitude of self-reflection benefits — 18 supporting, 2 contradicting, with task complexity as the key moderator.',
+  },
+  {
+    id: 's7',
+    title: 'Research Gaps',
+    content: 'Four gaps identified. The highest-opportunity gap combines RAG, persistent memory, and multimodal agents (27 papers, low density). Another combines self-reflection, tool use, and long-horizon planning (19 papers, low density).',
+  },
+  {
+    id: 's8',
+    title: 'Emerging Directions',
+    content: 'Self-evolving retrieval systems (momentum 86, high confidence), persistent multimodal memory (momentum 74, medium confidence), and autonomous evidence verification (momentum 63, medium confidence) lead the frontier.',
+  },
+  {
+    id: 's9',
+    title: 'Opportunities',
+    content: 'Four opportunities analyzed. Persistent multimodal memory (novelty 94, momentum 82) and self-evolving retrieval policies (novelty 88, momentum 76) offer the highest potential with moderate competition.',
+  },
+  {
+    id: 's10',
+    title: 'Hypotheses',
+    content: 'Two hypotheses formalized. H1: persistent multimodal memory improves long-horizon performance. H2: self-evolving retrieval policies outperform fixed strategies. Both connect directly to identified gaps and frontier directions.',
+  },
+  {
+    id: 's11',
+    title: 'Conclusion',
+    content: 'RAG is converging toward autonomous research agents. The trajectory is clear but the path is not: persistent memory, multimodal perception, and self-evolving retrieval remain open problems with high opportunity. Researchers who address the intersection of these threads are positioned to make foundational contributions.',
+  },
+  {
+    id: 's12',
+    title: 'References',
+    content: '428 papers cited. Key references: Self-RAG (Asai et al., 2024), Reflexion (Shinn et al., 2023), MemGPT (Packer et al., 2024), ReAct (Yao et al., 2023), Toolformer (Schick et al., 2023), RAP (Hao et al., 2023), CRAG (Yan et al., 2024), Active RAG (Jiang et al., 2023), Chain-of-Note (Yu et al., 2023), LongRAG (Jiang et al., 2024).',
+  },
+];
+
+export const collections: Collection[] = [
+  {
+    id: 'c1',
+    name: 'RAG',
+    count: 142,
+    papers: papers.filter((p) => p.tags.includes('RAG')),
+  },
+  {
+    id: 'c2',
+    name: 'Agent Memory',
+    count: 38,
+    papers: papers.filter((p) => p.tags.includes('Memory')),
+  },
+  {
+    id: 'c3',
+    name: 'Foundation Models',
+    count: 67,
+    papers: papers.filter((p) => p.tags.includes('Tool use') || p.tags.includes('Reasoning')),
+  },
+  {
+    id: 'c4',
+    name: 'Research Agents',
+    count: 54,
+    papers: papers.filter((p) => p.tags.includes('Agents')),
+  },
+  {
+    id: 'c5',
+    name: 'To Read',
+    count: 12,
+    papers: papers.slice(6, 10),
+  },
+];
+
+export const trendSeries: TrendSeries[] = [
+  {
+    id: 'pubs',
+    label: 'Publications',
+    color: 'hsl(217, 91%, 60%)',
+    data: [
+      { period: '2019', value: 12 },
+      { period: '2020', value: 28 },
+      { period: '2021', value: 54 },
+      { period: '2022', value: 112 },
+      { period: '2023', value: 248 },
+      { period: '2024', value: 428 },
+    ],
+  },
+  {
+    id: 'citations',
+    label: 'Citation velocity',
+    color: 'hsl(142, 71%, 45%)',
+    data: [
+      { period: '2019', value: 5 },
+      { period: '2020', value: 14 },
+      { period: '2021', value: 38 },
+      { period: '2022', value: 89 },
+      { period: '2023', value: 167 },
+      { period: '2024', value: 312 },
+    ],
+  },
+];
+
+export const topicGrowthSeries: TrendSeries[] = [
+  {
+    id: 'agentic',
+    label: 'Agentic Retrieval',
+    color: 'hsl(217, 91%, 60%)',
+    data: [
+      { period: 'Q1', value: 8 },
+      { period: 'Q2', value: 14 },
+      { period: 'Q3', value: 26 },
+      { period: 'Q4', value: 47 },
+    ],
+  },
+  {
+    id: 'memory',
+    label: 'Persistent Memory',
+    color: 'hsl(142, 71%, 45%)',
+    data: [
+      { period: 'Q1', value: 5 },
+      { period: 'Q2', value: 11 },
+      { period: 'Q3', value: 19 },
+      { period: 'Q4', value: 52 },
+    ],
+  },
+  {
+    id: 'multimodal',
+    label: 'Multimodal Agents',
+    color: 'hsl(38, 92%, 50%)',
+    data: [
+      { period: 'Q1', value: 4 },
+      { period: 'Q2', value: 9 },
+      { period: 'Q3', value: 15 },
+      { period: 'Q4', value: 28 },
+    ],
+  },
+];
+
+export const graphNodes: GraphNode[] = [
+  { id: 'n1', label: 'Self-RAG', type: 'paper', x: 250, y: 180, size: 24, connections: 8 },
+  { id: 'n2', label: 'Reflexion', type: 'paper', x: 420, y: 140, size: 20, connections: 6 },
+  { id: 'n3', label: 'MemGPT', type: 'paper', x: 560, y: 220, size: 18, connections: 5 },
+  { id: 'n4', label: 'ReAct', type: 'paper', x: 340, y: 320, size: 22, connections: 7 },
+  { id: 'n5', label: 'Toolformer', type: 'paper', x: 180, y: 340, size: 16, connections: 4 },
+  { id: 'n6', label: 'CRAG', type: 'paper', x: 150, y: 230, size: 14, connections: 3 },
+  { id: 'n7', label: 'Active RAG', type: 'paper', x: 620, y: 130, size: 14, connections: 3 },
+  { id: 'n8', label: 'RAG', type: 'topic', x: 380, y: 250, size: 28, connections: 10 },
+  { id: 'n9', label: 'Agents', type: 'topic', x: 480, y: 300, size: 26, connections: 9 },
+  { id: 'n10', label: 'Memory', type: 'topic', x: 520, y: 180, size: 22, connections: 6 },
+  { id: 'n11', label: 'Self-reflection', type: 'topic', x: 300, y: 120, size: 20, connections: 5 },
+  { id: 'n12', label: 'Asai et al.', type: 'author', x: 220, y: 100, size: 12, connections: 2 },
+  { id: 'n13', label: 'Yao et al.', type: 'author', x: 360, y: 380, size: 12, connections: 2 },
+  { id: 'n14', label: 'MCTS', type: 'method', x: 640, y: 340, size: 14, connections: 3 },
+  { id: 'n15', label: 'Reflection tokens', type: 'method', x: 260, y: 220, size: 14, connections: 3 },
+];
+
+export const graphEdges: GraphEdge[] = [
+  { from: 'n1', to: 'n8', type: 'citation', strength: 0.9 },
+  { from: 'n1', to: 'n11', type: 'conceptual', strength: 0.8 },
+  { from: 'n1', to: 'n15', type: 'shared-method', strength: 0.9 },
+  { from: 'n1', to: 'n12', type: 'citation', strength: 0.7 },
+  { from: 'n2', to: 'n9', type: 'conceptual', strength: 0.8 },
+  { from: 'n2', to: 'n10', type: 'conceptual', strength: 0.7 },
+  { from: 'n2', to: 'n11', type: 'conceptual', strength: 0.7 },
+  { from: 'n3', to: 'n10', type: 'conceptual', strength: 0.9 },
+  { from: 'n3', to: 'n9', type: 'conceptual', strength: 0.6 },
+  { from: 'n4', to: 'n9', type: 'conceptual', strength: 0.9 },
+  { from: 'n4', to: 'n13', type: 'citation', strength: 0.7 },
+  { from: 'n5', to: 'n9', type: 'conceptual', strength: 0.7 },
+  { from: 'n6', to: 'n8', type: 'citation', strength: 0.8 },
+  { from: 'n7', to: 'n8', type: 'citation', strength: 0.8 },
+  { from: 'n8', to: 'n9', type: 'conceptual', strength: 0.6 },
+  { from: 'n9', to: 'n10', type: 'conceptual', strength: 0.7 },
+  { from: 'n4', to: 'n14', type: 'shared-method', strength: 0.5 },
+  { from: 'n2', to: 'n4', type: 'similarity', strength: 0.6 },
+];
+
+export const assistantMessages: AssistantMessage[] = [
+  {
+    id: 'm1',
+    role: 'user',
+    content: 'How is retrieval-augmented generation evolving toward autonomous research agents?',
+  },
+  {
+    id: 'm2',
+    role: 'assistant',
+    trustCategory: 'inference',
+    content:
+      'RAG is evolving through four stages: static retrieval, active retrieval, self-reflective retrieval, and agentic retrieval. The current frontier combines persistent memory with self-reflection, enabling agents to retrieve, critique, and remember across long horizons.',
+    evidence: [evidence[0], evidence[1], evidence[5]],
+    interpretation:
+      'The trajectory is clear: retrieval is becoming adaptive (Self-RAG, Active RAG), memory is becoming persistent (MemGPT, Reflexion), and agents are gaining tool-use and planning capabilities (ReAct, Toolformer). The convergence of these threads defines the frontier.',
+    counterEvidence:
+      'LongRAG suggests long context may reduce retrieval needs, and CRAG shows retrieval correction remains necessary — indicating retrieval is not being replaced but refined.',
+    relatedPapers: ['Self-RAG', 'Reflexion', 'MemGPT', 'ReAct'],
+    nextQuestions: [
+      'What architecture unifies retrieval, memory, and tool use?',
+      'How do agents verify their own evidence?',
+      'What enables retrieval policies to improve over time?',
+    ],
+  },
+];
+
+export const processingSteps: ProcessingStep[] = [
+  { label: 'Metadata', status: 'done' },
+  { label: 'PDF', status: 'done' },
+  { label: 'Text', status: 'done' },
+  { label: 'Sections', status: 'done' },
+  { label: 'Embeddings', status: 'active' },
+  { label: 'Citation graph', status: 'pending' },
+  { label: 'Indexing', status: 'pending' },
+];
+
+export function getProject(id: string): ResearchProject | undefined {
+  return projects.find((p) => p.id === id);
+}
+
+export function getPaper(id: string): Paper | undefined {
+  return papers.find((p) => p.id === id);
+}

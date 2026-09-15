@@ -1,0 +1,11 @@
+
+import { AppShell } from '../components/app-shell';
+import { AssistantPage } from '../components/assistant-page';
+
+export default function Home() {
+  return (
+    <AppShell>
+      <AssistantPage />
+    </AppShell>
+  );
+}
