@@ -1,0 +1,11 @@
+{
+  "title": "Transformer Architecture: Contributions and Limitations",
+  "research_question": "What are the main contributions and limitations of the Transformer architecture introduced in Attention Is All You Need?",
+  "paper_ids": [],
+  "metadata": {
+    "depth": "deep",
+    "include_papers": true,
+    "include_github": true,
+    "include_docs": true
+  }
+}

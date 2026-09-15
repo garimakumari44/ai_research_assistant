@@ -1,0 +1,127 @@
+services:
+
+  # ==========================================================
+  # BACKEND - FASTAPI
+  # ==========================================================
+
+  backend:
+    build:
+      context: .
+
+    container_name: adaptive-rag
+
+    restart: unless-stopped
+
+    ports:
+      - "8000:8000"
+
+    env_file:
+      - .env
+
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+      redis:
+        condition: service_healthy
+
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+
+  # ==========================================================
+  # POSTGRESQL
+  # ==========================================================
+
+  postgres:
+    image: postgres:16
+
+    container_name: adaptive-rag-postgres
+
+    restart: unless-stopped
+
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: Application123
+      POSTGRES_DB: adaptive_rag
+
+    ports:
+      - "5432:5432"
+
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U postgres -d adaptive_rag"
+        ]
+
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+      start_period: 10s
+
+
+  # ==========================================================
+  # REDIS
+  # ==========================================================
+
+  redis:
+    image: redis:7
+
+    container_name: adaptive-rag-redis
+
+    restart: unless-stopped
+
+    ports:
+      - "6379:6379"
+
+    volumes:
+      - redis_data:/data
+
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "redis-cli",
+          "ping"
+        ]
+
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+
+  # ==========================================================
+  # MINIO
+  # ==========================================================
+  #
+  # MinIO is already running as:
+  #
+  #   enterprise_ai_minio
+  #
+  # Therefore it is intentionally NOT recreated here.
+  #
+  # Your backend can access it through:
+  #
+  #   http://host.docker.internal:9000
+  #
+  # if the application is configured that way.
+  #
+  # ==========================================================
+
+
+# ============================================================
+# PERSISTENT VOLUMES
+# ============================================================
+
+volumes:
+
+  postgres_data:
+    name: adaptive-rag-postgres-data
+
+  redis_data:
+    name: adaptive-rag-redis-datadocker compose config --services
