@@ -59,3 +59,4 @@ jobs:
       - name: Build frontend
         working-directory: research-assistant/frontend
         run: npm run build
+# CI workflow
