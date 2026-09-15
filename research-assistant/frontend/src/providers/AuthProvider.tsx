@@ -1,4 +1,3 @@
-
 "use client";
 
 import {
@@ -19,7 +18,6 @@ import {
   clearAuthTokens,
   getAccessToken,
   getRefreshToken,
-  refreshAccessToken,
   setAccessToken,
   setRefreshToken,
 } from "@/lib/api";
@@ -52,15 +50,8 @@ interface AuthContextType {
   loading: boolean;
   isAuthenticated: boolean;
 
-  login(
-    email: string,
-    password: string,
-  ): Promise<void>;
-
-  register(
-    data: RegisterData,
-  ): Promise<void>;
-
+  login(email: string, password: string): Promise<void>;
+  register(data: RegisterData): Promise<void>;
   logout(): void;
 }
 
@@ -68,10 +59,7 @@ interface AuthContextType {
 /* Context                                                                    */
 /* ========================================================================== */
 
-const AuthContext =
-  createContext<AuthContextType | undefined>(
-    undefined,
-  );
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 /* ========================================================================== */
 /* Constants                                                                  */
@@ -89,15 +77,9 @@ function saveUser(user: User): void {
   }
 
   try {
-    localStorage.setItem(
-      USER_KEY,
-      JSON.stringify(user),
-    );
+    localStorage.setItem(USER_KEY, JSON.stringify(user));
   } catch (error) {
-    console.warn(
-      "[auth] Failed to persist user:",
-      error,
-    );
+    console.warn("[auth] Failed to persist user:", error);
   }
 }
 
@@ -109,10 +91,7 @@ function clearUser(): void {
   try {
     localStorage.removeItem(USER_KEY);
   } catch (error) {
-    console.warn(
-      "[auth] Failed to clear stored user:",
-      error,
-    );
+    console.warn("[auth] Failed to clear stored user:", error);
   }
 }
 
@@ -120,18 +99,12 @@ function clearUser(): void {
 /* Error Helpers                                                              */
 /* ========================================================================== */
 
-function getErrorMessage(
-  error: unknown,
-  fallback: string,
-): string {
+function getErrorMessage(error: unknown, fallback: string): string {
   if (error instanceof Error) {
     return error.message || fallback;
   }
 
-  if (
-    typeof error === "object" &&
-    error !== null
-  ) {
+  if (typeof error === "object" && error !== null) {
     const candidate = error as {
       message?: unknown;
       detail?: unknown;
@@ -174,38 +147,22 @@ export function AuthProvider({
 }) {
   const router = useRouter();
 
-  const [user, setUser] =
-    useState<User | null>(null);
+  const [user, setUser] = useState<User | null>(null);
 
-  const [token, setToken] =
-    useState<string | null>(null);
+  const [token, setToken] = useState<string | null>(null);
 
-  const [loading, setLoading] =
-    useState(true);
+  const [loading, setLoading] = useState(true);
 
   /* ------------------------------------------------------------------------ */
   /* Load Authenticated User                                                  */
   /* ------------------------------------------------------------------------ */
 
-  const loadCurrentUser =
-    useCallback(
-      async (): Promise<User> => {
-        /*
-         * IMPORTANT:
-         *
-         * Do not use fetch() here.
-         *
-         * apiGet() is responsible for:
-         *   1. attaching the access token
-         *   2. detecting 401
-         *   3. refreshing the access token
-         *   4. retrying the request
-         *   5. logging out if refresh fails
-         */
-        return apiGet<User>("/auth/me");
-      },
-      [],
-    );
+  const loadCurrentUser = useCallback(
+    async (): Promise<User> => {
+      return apiGet<User>("/auth/me");
+    },
+    [],
+  );
 
   /* ------------------------------------------------------------------------ */
   /* Restore Session                                                          */
@@ -215,30 +172,15 @@ export function AuthProvider({
     let mounted = true;
 
     async function restoreSession(): Promise<void> {
-      const storedAccessToken =
-        getAccessToken();
+      const storedAccessToken = getAccessToken();
+      const storedRefreshToken = getRefreshToken();
 
-      const storedRefreshToken =
-        getRefreshToken();
+      console.debug("[auth] Restoring session", {
+        hasAccessToken: Boolean(storedAccessToken),
+        hasRefreshToken: Boolean(storedRefreshToken),
+      });
 
-      console.debug(
-        "[auth] Restoring session",
-        {
-          hasAccessToken:
-            Boolean(storedAccessToken),
-
-          hasRefreshToken:
-            Boolean(storedRefreshToken),
-        },
-      );
-
-      /*
-       * No credentials means the user is logged out.
-       */
-      if (
-        !storedAccessToken &&
-        !storedRefreshToken
-      ) {
+      if (!storedAccessToken && !storedRefreshToken) {
         if (mounted) {
           setToken(null);
           setUser(null);
@@ -249,24 +191,13 @@ export function AuthProvider({
       }
 
       try {
-        /*
-         * apiGet("/auth/me") automatically handles
-         * an expired access token.
-         *
-         * Therefore we intentionally do NOT manually
-         * call refreshAccessToken() after a 401 here.
-         *
-         * The central API client owns that responsibility.
-         */
-        const currentUser =
-          await loadCurrentUser();
+        const currentUser = await loadCurrentUser();
 
         if (!mounted) {
           return;
         }
 
-        const activeToken =
-          getAccessToken();
+        const activeToken = getAccessToken();
 
         setToken(activeToken);
         setUser(currentUser);
@@ -276,10 +207,8 @@ export function AuthProvider({
         console.debug(
           "[auth] Session restored successfully.",
           {
-            hasAccessToken:
-              Boolean(activeToken),
-            userId:
-              currentUser.id,
+            hasAccessToken: Boolean(activeToken),
+            userId: currentUser.id,
           },
         );
       } catch (error) {
@@ -288,10 +217,6 @@ export function AuthProvider({
           error,
         );
 
-        /*
-         * If apiGet() could not recover the session,
-         * clear all client-side authentication state.
-         */
         clearAuthTokens();
         clearUser();
 
@@ -322,57 +247,38 @@ export function AuthProvider({
       email: string,
       password: string,
     ): Promise<void> => {
-      /*
-       * Clear stale authentication state before
-       * starting a new login.
-       */
       clearAuthTokens();
       clearUser();
 
       setToken(null);
       setUser(null);
 
-      const normalizedEmail =
-        email.trim().toLowerCase();
+      const normalizedEmail = email.trim().toLowerCase();
 
       if (!normalizedEmail) {
-        throw new Error(
-          "Email address is required.",
-        );
+        throw new Error("Email address is required.");
       }
 
       if (!password) {
-        throw new Error(
-          "Password is required.",
-        );
+        throw new Error("Password is required.");
       }
 
       try {
-        /*
-         * Login is intentionally done through apiPost().
-         *
-         * There is no existing access token to refresh
-         * during login, so this simply sends the request
-         * through the same central API layer.
-         */
-        const response =
-          await apiPost<TokenResponse>(
-            "/auth/login",
-            {
-              email: normalizedEmail,
-              password,
-            },
-          );
+        const response = await apiPost<TokenResponse>(
+          "/auth/login",
+          {
+            email: normalizedEmail,
+            password,
+          },
+        );
 
         const accessToken =
-          typeof response?.access_token ===
-          "string"
+          typeof response?.access_token === "string"
             ? response.access_token.trim()
             : "";
 
         const refreshToken =
-          typeof response?.refresh_token ===
-          "string"
+          typeof response?.refresh_token === "string"
             ? response.refresh_token.trim()
             : "";
 
@@ -388,25 +294,13 @@ export function AuthProvider({
           );
         }
 
-        /*
-         * Persist tokens before requesting /auth/me.
-         */
         setAccessToken(accessToken);
         setRefreshToken(refreshToken);
 
-        /*
-         * Verify storage immediately.
-         */
-        const savedAccessToken =
-          getAccessToken();
+        const savedAccessToken = getAccessToken();
+        const savedRefreshToken = getRefreshToken();
 
-        const savedRefreshToken =
-          getRefreshToken();
-
-        if (
-          !savedAccessToken ||
-          !savedRefreshToken
-        ) {
+        if (!savedAccessToken || !savedRefreshToken) {
           clearAuthTokens();
 
           throw new Error(
@@ -416,59 +310,35 @@ export function AuthProvider({
 
         setToken(accessToken);
 
-        console.debug(
-          "[auth] Login tokens stored",
-          {
-            hasAccessToken:
-              Boolean(savedAccessToken),
+        console.debug("[auth] Login tokens stored", {
+          hasAccessToken: Boolean(savedAccessToken),
+          hasRefreshToken: Boolean(savedRefreshToken),
+        });
 
-            hasRefreshToken:
-              Boolean(savedRefreshToken),
-          },
-        );
-
-        /*
-         * /auth/me uses the central API client.
-         */
-        const currentUser =
-          await loadCurrentUser();
+        const currentUser = await loadCurrentUser();
 
         saveUser(currentUser);
         setUser(currentUser);
 
-        console.debug(
-          "[auth] Login completed successfully",
-          {
-            userId:
-              currentUser.id,
-
-            email:
-              currentUser.email,
-          },
-        );
+        console.debug("[auth] Login completed successfully", {
+          userId: currentUser.id,
+          email: currentUser.email,
+        });
 
         router.replace("/dashboard");
       } catch (error) {
-        /*
-         * A failed login must never leave stale
-         * credentials behind.
-         */
         clearAuthTokens();
         clearUser();
 
         setToken(null);
         setUser(null);
 
-        const message =
-          getErrorMessage(
-            error,
-            "Login failed.",
-          );
-
-        console.error(
-          "[auth] Login failed:",
+        const message = getErrorMessage(
           error,
+          "Login failed.",
         );
+
+        console.error("[auth] Login failed:", error);
 
         throw new Error(message);
       }
@@ -484,74 +354,44 @@ export function AuthProvider({
     async (
       data: RegisterData,
     ): Promise<void> => {
-      const fullName =
-        data.full_name.trim();
+      const fullName = data.full_name.trim();
 
-      const email =
-        data.email
-          .trim()
-          .toLowerCase();
+      const email = data.email.trim().toLowerCase();
 
-      const password =
-        data.password;
+      const password = data.password;
 
       if (!fullName) {
-        throw new Error(
-          "Full name is required.",
-        );
+        throw new Error("Full name is required.");
       }
 
       if (!email) {
-        throw new Error(
-          "Email address is required.",
-        );
+        throw new Error("Email address is required.");
       }
 
       if (!password) {
-        throw new Error(
-          "Password is required.",
-        );
+        throw new Error("Password is required.");
       }
 
       try {
-        /*
-         * Current backend registration contract
-         * returns UserResponse rather than tokens.
-         */
-        const result =
-          await apiPost<
-            User | TokenResponse
-          >(
-            "/auth/register",
-            {
-              full_name: fullName,
-              email,
-              password,
-            },
-          );
+        const result = await apiPost<User | TokenResponse>(
+          "/auth/register",
+          {
+            full_name: fullName,
+            email,
+            password,
+          },
+        );
 
-        /*
-         * Current backend:
-         *
-         * POST /auth/register
-         *       ↓
-         * UserResponse
-         *
-         * Therefore registration does not
-         * automatically authenticate the user.
-         */
         const possibleTokens =
           result as Partial<TokenResponse>;
 
         const accessToken =
-          typeof possibleTokens?.access_token ===
-          "string"
+          typeof possibleTokens?.access_token === "string"
             ? possibleTokens.access_token.trim()
             : "";
 
         const refreshToken =
-          typeof possibleTokens?.refresh_token ===
-          "string"
+          typeof possibleTokens?.refresh_token === "string"
             ? possibleTokens.refresh_token.trim()
             : "";
 
@@ -565,13 +405,6 @@ export function AuthProvider({
           return;
         }
 
-        /*
-         * Compatibility path:
-         *
-         * If the backend is later changed to return
-         * tokens during registration, this provider
-         * will automatically support that contract.
-         */
         if (!refreshToken) {
           throw new Error(
             "Registration returned an access token but no refresh token.",
@@ -581,16 +414,10 @@ export function AuthProvider({
         setAccessToken(accessToken);
         setRefreshToken(refreshToken);
 
-        const savedAccessToken =
-          getAccessToken();
+        const savedAccessToken = getAccessToken();
+        const savedRefreshToken = getRefreshToken();
 
-        const savedRefreshToken =
-          getRefreshToken();
-
-        if (
-          !savedAccessToken ||
-          !savedRefreshToken
-        ) {
+        if (!savedAccessToken || !savedRefreshToken) {
           clearAuthTokens();
 
           throw new Error(
@@ -600,8 +427,7 @@ export function AuthProvider({
 
         setToken(accessToken);
 
-        const currentUser =
-          await loadCurrentUser();
+        const currentUser = await loadCurrentUser();
 
         saveUser(currentUser);
         setUser(currentUser);
@@ -609,8 +435,7 @@ export function AuthProvider({
         console.debug(
           "[auth] Registration completed with automatic authentication.",
           {
-            userId:
-              currentUser.id,
+            userId: currentUser.id,
           },
         );
 
@@ -622,11 +447,10 @@ export function AuthProvider({
         setToken(null);
         setUser(null);
 
-        const message =
-          getErrorMessage(
-            error,
-            "Registration failed.",
-          );
+        const message = getErrorMessage(
+          error,
+          "Registration failed.",
+        );
 
         console.error(
           "[auth] Registration failed:",
@@ -644,9 +468,7 @@ export function AuthProvider({
   /* ------------------------------------------------------------------------ */
 
   const logout = useCallback((): void => {
-    console.debug(
-      "[auth] Logging out.",
-    );
+    console.debug("[auth] Logging out.");
 
     clearAuthTokens();
     clearUser();
@@ -661,37 +483,33 @@ export function AuthProvider({
   /* Context Value                                                            */
   /* ------------------------------------------------------------------------ */
 
-  const value =
-    useMemo<AuthContextType>(
-      () => ({
-        user,
-        token,
-        loading,
-        isAuthenticated:
-          Boolean(token),
+  const value = useMemo<AuthContextType>(
+    () => ({
+      user,
+      token,
+      loading,
+      isAuthenticated: Boolean(token),
 
-        login,
-        register,
-        logout,
-      }),
-      [
-        user,
-        token,
-        loading,
-        login,
-        register,
-        logout,
-      ],
-    );
+      login,
+      register,
+      logout,
+    }),
+    [
+      user,
+      token,
+      loading,
+      login,
+      register,
+      logout,
+    ],
+  );
 
   /* ------------------------------------------------------------------------ */
   /* Provider                                                                 */
   /* ------------------------------------------------------------------------ */
 
   return (
-    <AuthContext.Provider
-      value={value}
-    >
+    <AuthContext.Provider value={value}>
       {children}
     </AuthContext.Provider>
   );
@@ -702,8 +520,7 @@ export function AuthProvider({
 /* ========================================================================== */
 
 export function useAuth(): AuthContextType {
-  const context =
-    useContext(AuthContext);
+  const context = useContext(AuthContext);
 
   if (!context) {
     throw new Error(
@@ -713,4 +530,3 @@ export function useAuth(): AuthContextType {
 
   return context;
 }
-

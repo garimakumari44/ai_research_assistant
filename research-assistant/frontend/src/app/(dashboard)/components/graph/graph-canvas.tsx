@@ -68,7 +68,7 @@ export function GraphCanvas({
         target: edge.target,
         type: "graphEdge",
         animated: edge.animated ?? false,
-        data: edge,
+        data: { ...edge },
       })),
     [edges],
   );

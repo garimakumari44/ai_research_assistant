@@ -1,7 +1,7 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
-import { api } from '@/lib/api';
+import { apiGet } from '@/lib/api';
 
 export interface FrontierTrendPoint {
   period: string;
@@ -50,16 +50,12 @@ export function useFrontierTrends(
     enabled: Boolean(projectId),
 
     queryFn: async (): Promise<FrontierTrendsResponse> => {
-      const response = await api.get<FrontierTrendsResponse>(
-        `/api/v1/projects/${projectId}/frontier/trends`,
-        {
-          params: {
-            range: options.range ?? 'All',
-          },
-        },
-      );
+      const params = new URLSearchParams();
+      params.set('range', options.range ?? 'All');
 
-      return response.data;
+      return apiGet<FrontierTrendsResponse>(
+        `/api/v1/projects/${projectId}/frontier/trends?${params.toString()}`,
+      );
     },
 
     staleTime: 5 * 60_000,

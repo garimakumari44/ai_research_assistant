@@ -182,7 +182,7 @@ export function PaperView({
             {paper.venue && (
               <>
                 {" · "}
-                {paper.venue}
+                {typeof paper.venue === "string" ? paper.venue : paper.venue?.name || paper.venue?.display_name || paper.venue?.title || "Unknown"}
               </>
             )}
 
@@ -375,7 +375,7 @@ export function PaperView({
                   </MetricLabel>
 
                   <p className="mt-1 text-[13px] text-secondary-foreground">
-                    {paper.venue || "Unknown"}
+                    {typeof paper.venue === "string" ? paper.venue : paper.venue?.name || paper.venue?.display_name || paper.venue?.title || "Unknown"}
                   </p>
                 </div>
 
@@ -631,3 +631,4 @@ function PhasePlaceholder({
     </div>
   );
 }
+

@@ -1,45 +1,18 @@
-'use client';
+"use client";
 
-import { useQuery } from '@tanstack/react-query';
-import { apiGet } from '@/lib/api';
+import { useQuery } from "@tanstack/react-query";
+import { apiGet } from "@/lib/api";
 
-export type GraphNodeType =
-  | 'paper'
-  | 'topic'
-  | 'method'
-  | 'author'
-  | 'dataset';
+import type {
+  GraphEdge,
+  GraphNode,
+  GraphNodeType,
+} from "@/graph/types";
 
-export type GraphEdgeType = string;
+export type { GraphNodeType };
 
-export interface ProjectGraphNode {
-  id: string;
-  type: GraphNodeType;
-  label: string;
-
-  x?: number;
-  y?: number;
-  size?: number;
-  connections?: number;
-
-  metadata?: Record<string, unknown>;
-  relevance?: number;
-}
-
-export interface ProjectGraphEdge {
-  id?: string;
-
-  /**
-   * ReactFlow-style source/target.
-   */
-  source: string;
-  target: string;
-
-  strength?: number;
-  type?: GraphEdgeType;
-
-  metadata?: Record<string, unknown>;
-}
+export type ProjectGraphNode = GraphNode;
+export type ProjectGraphEdge = GraphEdge;
 
 export interface ProjectGraphMetadata {
   generated_at?: string;
@@ -56,10 +29,17 @@ export interface ProjectGraphResponse {
   metadata?: ProjectGraphMetadata;
 }
 
+export const graphKeys = {
+  all: ["graph"] as const,
+  node: (id: string) => ["graph", "node", id] as const,
+  traversal: (id: string, depth: number) =>
+    ["graph", "traversal", id, depth] as const,
+};
+
 export interface UseGraphOptions {
   depth?: number;
   node_type?: GraphNodeType;
-  edge_type?: GraphEdgeType;
+  edge_type?: string;
   search?: string;
   enabled?: boolean;
 }
@@ -75,7 +55,7 @@ export function useGraph(options: UseGraphOptions = {}) {
 
   return useQuery<ProjectGraphResponse>({
     queryKey: [
-      'graph',
+      "graph",
       depth,
       node_type ?? null,
       edge_type ?? null,
@@ -87,26 +67,24 @@ export function useGraph(options: UseGraphOptions = {}) {
     queryFn: async () => {
       const params = new URLSearchParams();
 
-      params.set('depth', String(depth));
+      params.set("depth", String(depth));
 
       if (node_type) {
-        params.set('node_type', node_type);
+        params.set("node_type", node_type);
       }
 
       if (edge_type) {
-        params.set('edge_type', edge_type);
+        params.set("edge_type", edge_type);
       }
 
       const normalizedSearch = search?.trim();
 
       if (normalizedSearch) {
-        params.set('search', normalizedSearch);
+        params.set("search", normalizedSearch);
       }
 
-      const queryString = params.toString();
-
       const response = await apiGet<ProjectGraphResponse>(
-        `/graph?${queryString}`,
+        `/graph?${params.toString()}`,
       );
 
       return response;
@@ -117,4 +95,3 @@ export function useGraph(options: UseGraphOptions = {}) {
     placeholderData: (previousData) => previousData,
   });
 }
-

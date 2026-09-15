@@ -70,6 +70,15 @@ export function ProjectLayout({
 
   const project = data.project;
 
+  const status =
+    project.status === 'active' ||
+    project.status === 'paused' ||
+    project.status === 'archived' ||
+    project.status === 'done' ||
+    project.status === 'pending'
+      ? project.status
+      : 'pending';
+
   return (
     <div className="flex flex-col">
       {/* Project header */}
@@ -89,7 +98,7 @@ export function ProjectLayout({
           <div className="flex items-start justify-between gap-6 flex-wrap">
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2.5 mb-2">
-                <StatusDot status={project.status} />
+                <StatusDot status={status} />
 
                 <h1 className="text-xl md:text-2xl font-medium tracking-tight text-foreground">
                   {project.title}

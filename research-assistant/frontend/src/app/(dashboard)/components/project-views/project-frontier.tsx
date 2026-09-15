@@ -30,6 +30,13 @@ export function ProjectFrontier({
   const frontier = data?.items ?? [];
   const current = frontier[active];
 
+  const confidence =
+    current && current.confidence >= 0.75
+      ? 'high'
+      : current && current.confidence >= 0.5
+        ? 'medium'
+        : 'low';
+
   if (isLoading) {
     return (
       <div className="mx-auto max-w-5xl">
@@ -184,7 +191,7 @@ export function ProjectFrontier({
             <TrustTag category="forecast" />
 
             <ConfidenceMeter
-              value={current.confidence}
+              value={confidence}
               label="Confidence"
             />
           </div>

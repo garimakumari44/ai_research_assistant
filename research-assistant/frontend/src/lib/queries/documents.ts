@@ -58,7 +58,7 @@ export function useUploadDocument() {
       file,
       paperId,
     }: UploadDocumentVariables) =>
-      uploadDocument(file, paperId),
+      uploadDocument(file),
 
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({

@@ -6,8 +6,6 @@ import {
 } from '../../components/primitives';
 import { useProjectOverview } from '@/projects/hooks/use-project-overview';
 
-
-
 export function ProjectOverview({
   projectId,
 }: {
@@ -53,6 +51,11 @@ export function ProjectOverview({
       </div>
     );
   }
+
+  const currentFrontier =
+    typeof data.currentFrontier === 'string'
+      ? data.currentFrontier
+      : 'No current frontier identified.';
 
   return (
     <div className="mx-auto max-w-5xl">
@@ -101,8 +104,7 @@ export function ProjectOverview({
           </SectionLabel>
 
           <p className="text-[14px] text-foreground leading-relaxed">
-            {data.currentFrontier ||
-              'No current frontier identified.'}
+            {currentFrontier}
           </p>
         </section>
 

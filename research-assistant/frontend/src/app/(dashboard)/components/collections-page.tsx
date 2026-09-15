@@ -72,9 +72,7 @@ type CollectionLike = {
   paper_count?: number | null;
 };
 
-function normalizePaperId(
-  value: unknown,
-): number | null {
+function normalizePaperId(value: unknown): number | null {
   if (
     value === null ||
     value === undefined ||
@@ -85,10 +83,7 @@ function normalizePaperId(
 
   const id = Number(value);
 
-  if (
-    !Number.isInteger(id) ||
-    id <= 0
-  ) {
+  if (!Number.isInteger(id) || id <= 0) {
     return null;
   }
 
@@ -107,9 +102,7 @@ function normalizeCollectionId(
 
   const id = String(value).trim();
 
-  return id.length > 0
-    ? id
-    : null;
+  return id.length > 0 ? id : null;
 }
 
 function normalizeCollections(
@@ -189,32 +182,28 @@ function getErrorMessage(
       >;
 
     if (
-      typeof value.message ===
-        "string" &&
+      typeof value.message === "string" &&
       value.message.trim()
     ) {
       return value.message;
     }
 
     if (
-      typeof value.detail ===
-        "string" &&
+      typeof value.detail === "string" &&
       value.detail.trim()
     ) {
       return value.detail;
     }
 
     if (
-      typeof value.error ===
-        "string" &&
+      typeof value.error === "string" &&
       value.error.trim()
     ) {
       return value.error;
     }
 
     if (
-      typeof value.code ===
-        "string" &&
+      typeof value.code === "string" &&
       value.code.trim()
     ) {
       return value.code;
@@ -263,14 +252,10 @@ function getErrorDetails(
         "string"
           ? candidate.code
           : undefined,
-      details:
-        candidate.details,
-      data:
-        candidate.data,
-      detail:
-        candidate.detail,
-      error:
-        candidate.error,
+      details: candidate.details,
+      data: candidate.data,
+      detail: candidate.detail,
+      error: candidate.error,
     };
   }
 
@@ -310,14 +295,10 @@ function getErrorDetails(
         "string"
           ? value.code
           : undefined,
-      details:
-        value.details,
-      data:
-        value.data,
-      detail:
-        value.detail,
-      error:
-        value.error,
+      details: value.details,
+      data: value.data,
+      detail: value.detail,
+      error: value.error,
     };
   }
 
@@ -343,8 +324,7 @@ function renderAuthors(
         .map((author) => {
           if (
             author &&
-            typeof author ===
-              "object" &&
+            typeof author === "object" &&
             "full_name" in author
           ) {
             const fullName = (
@@ -361,8 +341,7 @@ function renderAuthors(
 
           if (
             author &&
-            typeof author ===
-              "object" &&
+            typeof author === "object" &&
             "name" in author
           ) {
             const name = (
@@ -377,9 +356,7 @@ function renderAuthors(
               : "";
           }
 
-          return String(
-            author,
-          ).trim();
+          return String(author).trim();
         })
         .filter(Boolean);
 
@@ -421,10 +398,8 @@ export function CollectionsPage() {
 
   const {
     data: collectionsData,
-    isLoading:
-      collectionsLoading,
-    error:
-      collectionsError,
+    isLoading: collectionsLoading,
+    error: collectionsError,
   } = useCollections();
 
   const collections =
@@ -468,8 +443,6 @@ export function CollectionsPage() {
   ] = useState<number>(
     DEFAULT_PAGE_SIZE,
   );
-
-  /* Create form */
 
   const [
     collectionName,
@@ -537,22 +510,15 @@ export function CollectionsPage() {
 
   const {
     data: collection,
-    isLoading:
-      collectionLoading,
-    error:
-      collectionError,
+    isLoading: collectionLoading,
+    error: collectionError,
   } = useCollection(
-    activeCollectionId ??
-      undefined,
+    activeCollectionId ?? undefined,
     {
       enabled:
         !createMode &&
-        Boolean(
-          activeCollectionId,
-        ) &&
-        Boolean(
-          activeCollection,
-        ),
+        Boolean(activeCollectionId) &&
+        Boolean(activeCollection),
     },
   );
 
@@ -562,8 +528,7 @@ export function CollectionsPage() {
 
   const {
     data: papersData,
-    isLoading:
-      papersLoading,
+    isLoading: papersLoading,
   } = useQuery({
     queryKey: [
       "papers",
@@ -576,7 +541,10 @@ export function CollectionsPage() {
         page: 1,
         page_size:
           PAPER_PICKER_PAGE_SIZE,
-        search:
+
+        // FIX:
+        // PaperSearchParams uses `query`, not `search`.
+        query:
           paperPickerSearch.trim() ||
           undefined,
       }),
@@ -679,9 +647,11 @@ export function CollectionsPage() {
         paperId,
       }: {
         collectionId:
-          string | number;
+          | string
+          | number;
         paperId:
-          number | string;
+          | number
+          | string;
       }) =>
         addCollectionItem(
           collectionId,
@@ -704,7 +674,8 @@ export function CollectionsPage() {
     useMutation({
       mutationFn: (
         collectionId:
-          string | number,
+          | string
+          | number,
       ) =>
         deleteCollectionApi(
           collectionId,
@@ -720,9 +691,7 @@ export function CollectionsPage() {
       return;
     }
 
-    if (
-      collections.length === 0
-    ) {
+    if (collections.length === 0) {
       if (
         activeCollectionId !==
         null
@@ -833,7 +802,8 @@ export function CollectionsPage() {
       );
 
     if (
-      normalizedId === null
+      normalizedId ===
+      null
     ) {
       return;
     }
@@ -861,7 +831,7 @@ export function CollectionsPage() {
   }
 
   /* ------------------------------------------------------------------------ */
-  /* Create collection                                                         */
+  /* Create collection                                                        */
   /* ------------------------------------------------------------------------ */
 
   async function handleCreateCollection(
@@ -919,10 +889,6 @@ export function CollectionsPage() {
         },
       );
 
-      /* -------------------------------------------------------------- */
-      /* Step 1: Create collection                                     */
-      /* -------------------------------------------------------------- */
-
       const created =
         await createCollection.mutateAsync(
           {
@@ -951,10 +917,6 @@ export function CollectionsPage() {
           "The server created the collection but did not return a valid collection ID.",
         );
       }
-
-      /* -------------------------------------------------------------- */
-      /* Step 2: Link selected papers                                  */
-      /* -------------------------------------------------------------- */
 
       const failedPapers: string[] =
         [];
@@ -1022,10 +984,6 @@ export function CollectionsPage() {
         }
       }
 
-      /* -------------------------------------------------------------- */
-      /* Step 3: Refresh collection data                               */
-      /* -------------------------------------------------------------- */
-
       await queryClient.invalidateQueries(
         {
           queryKey:
@@ -1041,10 +999,6 @@ export function CollectionsPage() {
             ),
         },
       );
-
-      /* -------------------------------------------------------------- */
-      /* Step 4: Open newly created collection                         */
-      /* -------------------------------------------------------------- */
 
       setActiveCollectionId(
         createdCollectionId,
@@ -1230,10 +1184,6 @@ export function CollectionsPage() {
 
   return (
     <div className="flex h-full min-h-0 flex-col">
-      {/* ================================================================== */}
-      {/* Header                                                             */}
-      {/* ================================================================== */}
-
       <div className="flex shrink-0 items-center justify-between border-b px-6 py-4">
         <div>
           <h1 className="text-xl font-semibold">
@@ -1263,15 +1213,7 @@ export function CollectionsPage() {
         </button>
       </div>
 
-      {/* ================================================================== */}
-      {/* Main layout                                                        */}
-      {/* ================================================================== */}
-
       <div className="grid min-h-0 flex-1 grid-cols-[320px_minmax(0,1fr)]">
-        {/* ================================================================ */}
-        {/* Sidebar                                                          */}
-        {/* ================================================================ */}
-
         <aside className="flex min-h-0 flex-col border-r">
           <div className="border-b p-4">
             <div className="relative">
@@ -1413,8 +1355,6 @@ export function CollectionsPage() {
             )}
           </div>
 
-          {/* Pagination */}
-
           <div className="flex shrink-0 items-center justify-between border-t p-3">
             <select
               value={pageSize}
@@ -1508,15 +1448,7 @@ export function CollectionsPage() {
           </div>
         </aside>
 
-        {/* ================================================================ */}
-        {/* Main content                                                     */}
-        {/* ================================================================ */}
-
         <main className="min-h-0 overflow-y-auto">
-          {/* ============================================================ */}
-          {/* CREATE MODE                                                   */}
-          {/* ============================================================ */}
-
           {createMode ? (
             <div className="mx-auto w-full max-w-4xl p-8">
               <div className="flex items-start justify-between gap-6 border-b pb-6">
@@ -1553,8 +1485,6 @@ export function CollectionsPage() {
                 className="mt-8"
               >
                 <div className="space-y-7">
-                  {/* Name */}
-
                   <div>
                     <label
                       htmlFor="collection-name"
@@ -1594,8 +1524,6 @@ export function CollectionsPage() {
                     />
                   </div>
 
-                  {/* Description */}
-
                   <div>
                     <label
                       htmlFor="collection-description"
@@ -1627,15 +1555,11 @@ export function CollectionsPage() {
                     />
                   </div>
 
-                  {/* Create error */}
-
                   {createError && (
                     <div className="rounded-md border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
                       {createError}
                     </div>
                   )}
-
-                  {/* Paper picker */}
 
                   <div>
                     <div className="mb-3 flex items-center justify-between">
@@ -1787,8 +1711,6 @@ export function CollectionsPage() {
                   </div>
                 </div>
 
-                {/* Form actions */}
-
                 <div className="mt-8 flex items-center justify-end gap-3 border-t pt-6">
                   <button
                     type="button"
@@ -1822,10 +1744,6 @@ export function CollectionsPage() {
               </form>
             </div>
           ) : !activeCollectionId ? (
-            /* ============================================================ */
-            /* NO COLLECTION                                                */
-            /* ============================================================ */
-
             <div className="flex h-full items-center justify-center p-10">
               <div className="max-w-md text-center">
                 <FolderOpen className="mx-auto h-10 w-10 text-muted-foreground" />
@@ -1851,26 +1769,14 @@ export function CollectionsPage() {
               </div>
             </div>
           ) : !activeCollection ? (
-            /* ============================================================ */
-            /* SYNCING                                                      */
-            /* ============================================================ */
-
             <div className="p-8 text-sm text-muted-foreground">
               Synchronizing collection...
             </div>
           ) : collectionLoading ? (
-            /* ============================================================ */
-            /* LOADING                                                      */
-            /* ============================================================ */
-
             <div className="p-8 text-sm text-muted-foreground">
               Loading collection...
             </div>
           ) : detailError ? (
-            /* ============================================================ */
-            /* DETAIL ERROR                                                 */
-            /* ============================================================ */
-
             <div className="p-8">
               <div className="rounded-lg border border-destructive/30 bg-destructive/10 p-4">
                 <div className="text-sm font-medium text-destructive">
@@ -1883,21 +1789,11 @@ export function CollectionsPage() {
               </div>
             </div>
           ) : !collection ? (
-            /* ============================================================ */
-            /* NOT FOUND                                                    */
-            /* ============================================================ */
-
             <div className="p-8 text-sm text-muted-foreground">
               Collection not found.
             </div>
           ) : (
-            /* ============================================================ */
-            /* COLLECTION DETAIL                                            */
-            /* ============================================================ */
-
             <div className="mx-auto w-full max-w-5xl p-8">
-              {/* Header */}
-
               <div className="flex items-start justify-between gap-6 border-b pb-6">
                 <div className="min-w-0">
                   <h2 className="truncate text-2xl font-semibold tracking-tight">
@@ -1932,8 +1828,6 @@ export function CollectionsPage() {
                   Delete
                 </button>
               </div>
-
-              {/* Partial linking warning */}
 
               {addPaperErrors.length >
                 0 && (
@@ -1970,10 +1864,6 @@ export function CollectionsPage() {
                   </button>
                 </div>
               )}
-
-              {/* ======================================================== */}
-              {/* Papers                                                    */}
-              {/* ======================================================== */}
 
               <div className="mt-8">
                 <div className="flex items-center justify-between">

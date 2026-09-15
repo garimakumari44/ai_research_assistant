@@ -1,7 +1,7 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
-import { api } from '@/lib/api';
+import { apiGet } from '@/lib/api';
 
 export type HypothesisStatus =
   | 'draft'
@@ -36,20 +36,36 @@ export interface ProjectHypothesis {
 export interface HypothesesResponse {
   projectId: string;
   hypotheses: ProjectHypothesis[];
+  items: ProjectHypothesis[];
   total: number;
 }
 
 export function useHypotheses(projectId: string) {
-  return useQuery({
+  return useQuery<HypothesesResponse>({
     queryKey: ['projects', projectId, 'hypotheses'],
     enabled: Boolean(projectId),
 
     queryFn: async (): Promise<HypothesesResponse> => {
-      const response = await api.get<HypothesesResponse>(
-        `/api/v1/projects/${projectId}/frontier/hypotheses`,
-      );
+      const response = await apiGet<
+        Omit<HypothesesResponse, 'items'> & {
+          items?: ProjectHypothesis[];
+          hypotheses?: ProjectHypothesis[];
+        }
+      >(`/api/v1/projects/${projectId}/frontier/hypotheses`);
 
-      return response.data;
+      const items =
+        response.items ??
+        response.hypotheses ??
+        [];
+
+      return {
+        ...response,
+        projectId: response.projectId ?? projectId,
+        hypotheses:
+          response.hypotheses ?? items,
+        items,
+        total: response.total ?? items.length,
+      };
     },
 
     staleTime: 5 * 60_000,

@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
@@ -26,6 +25,7 @@ import type {
   Report,
   ReportContent,
   ReportEvidence,
+  ReportListItem,
 } from "@/reports/types";
 
 import {
@@ -69,7 +69,6 @@ function getEvidenceContext(
   return (
     evidence.quote ??
     evidence.evidence ??
-    evidence.supporting_text ??
     ""
   );
 }
@@ -85,10 +84,11 @@ function getEvidenceDocumentId(
   }
 
   if (
-    evidence.source_id !== null &&
-    evidence.source_id !== undefined
+    evidence.source !== null &&
+    evidence.source !== undefined &&
+    evidence.source !== ""
   ) {
-    return String(evidence.source_id);
+    return String(evidence.source);
   }
 
   return null;
@@ -165,28 +165,6 @@ function formatDateTime(
 /* ==========================================================================
    REPORT CONTENT NORMALIZATION
    ========================================================================== */
-
-/**
- * The reports API can return either plain strings or structured
- * evidence/claim objects.
- *
- * React cannot render an object directly:
- *
- *   {item}
- *
- * when item is:
- *
- *   {
- *     id,
- *     claim,
- *     source_id,
- *     confidence,
- *     relevance_score,
- *     supporting_text
- *   }
- *
- * These helpers normalize those values into displayable strings.
- */
 
 function formatReportItem(
   item: unknown,
@@ -332,12 +310,6 @@ function formatReportItem(
       return parts.join("\n");
     }
 
-    /*
-     * Last-resort fallback.
-     *
-     * This guarantees that an unexpected object can never reach
-     * React as a child.
-     */
     try {
       return JSON.stringify(
         item,
@@ -387,10 +359,6 @@ function buildReportSections(
 
   let order = 0;
 
-  /* ------------------------------------------------------------------------
-     Executive Summary
-     ------------------------------------------------------------------------ */
-
   if (
     content.executive_summary
   ) {
@@ -405,10 +373,6 @@ function buildReportSections(
       order: order++,
     });
   }
-
-  /* ------------------------------------------------------------------------
-     Key Findings
-     ------------------------------------------------------------------------ */
 
   if (
     Array.isArray(
@@ -428,10 +392,6 @@ function buildReportSections(
     });
   }
 
-  /* ------------------------------------------------------------------------
-     Methodology
-     ------------------------------------------------------------------------ */
-
   if (
     content.methodology
   ) {
@@ -445,10 +405,6 @@ function buildReportSections(
       order: order++,
     });
   }
-
-  /* ------------------------------------------------------------------------
-     Evidence Synthesis
-     ------------------------------------------------------------------------ */
 
   if (
     content.evidence_synthesis
@@ -465,10 +421,6 @@ function buildReportSections(
     });
   }
 
-  /* ------------------------------------------------------------------------
-     Supporting Evidence
-     ------------------------------------------------------------------------ */
-
   if (
     content.supporting_evidence
   ) {
@@ -483,10 +435,6 @@ function buildReportSections(
       order: order++,
     });
   }
-
-  /* ------------------------------------------------------------------------
-     Contradictions
-     ------------------------------------------------------------------------ */
 
   if (
     Array.isArray(
@@ -507,10 +455,6 @@ function buildReportSections(
     });
   }
 
-  /* ------------------------------------------------------------------------
-     Research Gaps
-     ------------------------------------------------------------------------ */
-
   if (
     Array.isArray(
       content.research_gaps,
@@ -529,10 +473,6 @@ function buildReportSections(
       order: order++,
     });
   }
-
-  /* ------------------------------------------------------------------------
-     Emerging Trends
-     ------------------------------------------------------------------------ */
 
   if (
     Array.isArray(
@@ -553,10 +493,6 @@ function buildReportSections(
     });
   }
 
-  /* ------------------------------------------------------------------------
-     Future Directions
-     ------------------------------------------------------------------------ */
-
   if (
     Array.isArray(
       content.future_directions,
@@ -575,10 +511,6 @@ function buildReportSections(
       order: order++,
     });
   }
-
-  /* ------------------------------------------------------------------------
-     Conclusion
-     ------------------------------------------------------------------------ */
 
   if (
     content.conclusion
@@ -630,8 +562,7 @@ export function ReportsPage() {
 
   const reportQuery =
     useReport(
-      selectedReportId ??
-        undefined,
+      selectedReportId ?? undefined,
     );
 
   const generateReportMutation =
@@ -642,7 +573,7 @@ export function ReportsPage() {
      ------------------------------------------------------------------------ */
 
   const reports =
-    useMemo<Report[]>(
+    useMemo<ReportListItem[]>(
       () =>
         reportsQuery.data
           ?.items ?? [],
@@ -940,9 +871,7 @@ export function ReportsPage() {
       id="research-report-page"
       className="mx-auto max-w-7xl px-6 py-10 md:px-10"
     >
-      {/* =====================================================================
-          HEADER
-          ===================================================================== */}
+      {/* HEADER */}
 
       <div className="report-chrome mb-6">
         <div className="mb-2 flex items-center gap-2">
@@ -1016,9 +945,7 @@ export function ReportsPage() {
 
       <Divider />
 
-      {/* =====================================================================
-          GENERATOR
-          ===================================================================== */}
+      {/* GENERATOR */}
 
       <section className="report-chrome py-6">
         <SectionLabel>
@@ -1098,8 +1025,6 @@ export function ReportsPage() {
           </div>
         </div>
 
-        {/* Generation progress */}
-
         {isGenerating && (
           <div className="mt-3 rounded-lg border border-primary/20 bg-primary/5 px-4 py-3">
             <div className="flex items-center gap-3">
@@ -1121,8 +1046,6 @@ export function ReportsPage() {
           </div>
         )}
 
-        {/* Error */}
-
         {hasError &&
           !isGenerating && (
             <div className="mt-3 rounded-lg border border-danger/30 bg-danger/5 px-4 py-3">
@@ -1139,9 +1062,7 @@ export function ReportsPage() {
 
       <Divider />
 
-      {/* =====================================================================
-          REPORT HISTORY
-          ===================================================================== */}
+      {/* REPORT HISTORY */}
 
       {reports.length > 0 && (
         <section className="report-chrome py-5">
@@ -1215,15 +1136,9 @@ export function ReportsPage() {
 
       <Divider />
 
-      {/* =====================================================================
-          REPORT
-          ===================================================================== */}
+      {/* REPORT */}
 
       <div id="research-report">
-        {/* -------------------------------------------------------------------
-            LOADING
-            ------------------------------------------------------------------- */}
-
         {isLoading && (
           <div className="flex items-center justify-center py-24">
             <div className="flex items-center gap-2 text-[12px] text-muted-foreground">
@@ -1232,10 +1147,6 @@ export function ReportsPage() {
             </div>
           </div>
         )}
-
-        {/* -------------------------------------------------------------------
-            EMPTY
-            ------------------------------------------------------------------- */}
 
         {!isLoading &&
           !report && (
@@ -1255,16 +1166,10 @@ export function ReportsPage() {
             </div>
           )}
 
-        {/* -------------------------------------------------------------------
-            ACTUAL REPORT
-            ------------------------------------------------------------------- */}
-
         {!isLoading &&
           report && (
             <>
-              {/* =============================================================
-                  REPORT COVER / HEADER
-                  ============================================================= */}
+              {/* REPORT HEADER */}
 
               <div className="report-header py-8">
                 <div className="border-b border-border pb-7">
@@ -1328,14 +1233,10 @@ export function ReportsPage() {
                 </div>
               </div>
 
-              {/* =============================================================
-                  CONTENT GRID
-                  ============================================================= */}
+              {/* CONTENT GRID */}
 
               <div className="grid grid-cols-1 gap-10 lg:grid-cols-[190px_minmax(0,1fr)]">
-                {/* -----------------------------------------------------------
-                    CONTENTS
-                    ----------------------------------------------------------- */}
+                {/* CONTENTS */}
 
                 <aside className="report-chrome lg:sticky lg:top-4 lg:self-start">
                   <SectionLabel>
@@ -1390,14 +1291,10 @@ export function ReportsPage() {
                   )}
                 </aside>
 
-                {/* -----------------------------------------------------------
-                    DOCUMENT
-                    ----------------------------------------------------------- */}
+                {/* DOCUMENT */}
 
                 <main className="min-w-0 max-w-4xl">
-                  {/* =========================================================
-                      SECTIONS
-                      ========================================================= */}
+                  {/* SECTIONS */}
 
                   {sections.map(
                     (section) => (
@@ -1437,9 +1334,7 @@ export function ReportsPage() {
                     ),
                   )}
 
-                  {/* =========================================================
-                      SUMMARY FALLBACK
-                      ========================================================= */}
+                  {/* SUMMARY FALLBACK */}
 
                   {sections.length ===
                     0 &&
@@ -1466,9 +1361,7 @@ export function ReportsPage() {
                       </article>
                     )}
 
-                  {/* =========================================================
-                      SUPPORTING EVIDENCE
-                      ========================================================= */}
+                  {/* SUPPORTING EVIDENCE */}
 
                   {evidence.length >
                     0 && (
@@ -1620,9 +1513,7 @@ export function ReportsPage() {
                     </section>
                   )}
 
-                  {/* =========================================================
-                      REFERENCES
-                      ========================================================= */}
+                  {/* REFERENCES */}
 
                   {Array.isArray(
                     reportContent?.references,
@@ -1676,9 +1567,7 @@ export function ReportsPage() {
                       </section>
                     )}
 
-                  {/* =========================================================
-                      REPORT FOOTER
-                      ========================================================= */}
+                  {/* REPORT FOOTER */}
 
                   <footer className="report-footer pb-12">
                     <div className="flex flex-wrap items-center gap-x-5 gap-y-2 font-mono-tech text-[9px] uppercase tracking-wider text-faint">
@@ -1722,4 +1611,3 @@ export function ReportsPage() {
     </div>
   );
 }
-

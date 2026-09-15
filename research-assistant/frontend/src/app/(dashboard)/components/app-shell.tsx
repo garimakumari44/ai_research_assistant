@@ -38,7 +38,9 @@ export function AppShell({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
-  const { signOut } = useAuth();
+
+  // AuthProvider exposes `logout`, not `signOut`.
+  const { logout } = useAuth();
 
   const [commandOpen, setCommandOpen] = useState(false);
 
@@ -108,7 +110,7 @@ export function AppShell({
         <div className="border-t border-border p-3">
           <button
             type="button"
-            onClick={signOut}
+            onClick={logout}
             className="group flex w-full items-center gap-2.5 rounded-md px-2.5 py-2 text-[13px] text-muted-foreground transition-all hover:bg-elevated hover:text-foreground"
           >
             <LogOut className="h-3.5 w-3.5 text-faint transition-colors group-hover:text-primary" />

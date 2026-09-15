@@ -14,17 +14,17 @@ import type {
   ResearchStatus,
 } from "../../research/types";
 
-/**
- * Human-readable research status.
- */
 export function formatResearchStatus(
   status: ResearchStatus,
 ): string {
-  const labels: Record<ResearchStatus, string> = {
+  const labels: Partial<Record<ResearchStatus, string>> = {
     idle: "Idle",
+    pending: "Pending",
+    queued: "Queued",
     planning: "Planning research",
     searching: "Searching",
     retrieving: "Retrieving evidence",
+    running: "Running research",
     synthesizing: "Synthesizing answer",
     verifying: "Verifying answer",
     completed: "Completed",
@@ -35,17 +35,17 @@ export function formatResearchStatus(
   return labels[status] ?? status;
 }
 
-/**
- * Format a research status as a short UI label.
- */
 export function formatResearchStatusShort(
   status: ResearchStatus,
 ): string {
-  const labels: Record<ResearchStatus, string> = {
+  const labels: Partial<Record<ResearchStatus, string>> = {
     idle: "Idle",
+    pending: "Pending",
+    queued: "Queued",
     planning: "Planning",
     searching: "Searching",
     retrieving: "Retrieving",
+    running: "Running",
     synthesizing: "Synthesizing",
     verifying: "Verifying",
     completed: "Complete",
@@ -56,12 +56,9 @@ export function formatResearchStatusShort(
   return labels[status] ?? status;
 }
 
-/**
- * Convert a score from 0-1 into a percentage.
- */
 export function formatScore(
   score?: number,
-  fallback = "â€”",
+  fallback = "—",
 ): string {
   if (score === undefined || Number.isNaN(score)) {
     return fallback;
@@ -75,18 +72,12 @@ export function formatScore(
   return `${Math.round(normalized * 100)}%`;
 }
 
-/**
- * Format confidence.
- */
 export function formatConfidence(
   confidence?: number,
 ): string {
   return formatScore(confidence);
 }
 
-/**
- * Format research progress.
- */
 export function formatProgress(
   progress?: number,
 ): string {
@@ -99,9 +90,6 @@ export function formatProgress(
   )}%`;
 }
 
-/**
- * Format source type.
- */
 export function formatSourceType(
   source: ResearchSource,
 ): string {
@@ -118,14 +106,17 @@ export function formatSourceType(
     case "database":
       return "Database";
 
+    case "github":
+      return "GitHub";
+
+    case "documentation":
+      return "Documentation";
+
     default:
       return "Source";
   }
 }
 
-/**
- * Return a safe domain name from a URL.
- */
 export function getSourceDomain(
   source: ResearchSource,
 ): string {
@@ -147,24 +138,22 @@ export function getSourceDomain(
   }
 }
 
-/**
- * Create a compact source label.
- */
 export function formatSourceLabel(
   source: ResearchSource,
 ): string {
   const domain = getSourceDomain(source);
 
-  if (source.author) {
-    return `${source.author} Â· ${domain}`;
+  const author =
+    source.author ??
+    source.authors?.[0];
+
+  if (author) {
+    return `${author} · ${domain}`;
   }
 
   return domain;
 }
 
-/**
- * Format a research plan for display.
- */
 export function formatResearchPlan(
   plan?: ResearchPlan,
 ): string {
@@ -172,23 +161,26 @@ export function formatResearchPlan(
     return "No research plan available.";
   }
 
-  if (plan.steps.length === 0) {
-    return plan.objective;
+  const objective =
+    plan.objective ??
+    "Research plan";
+
+  const steps = plan.steps ?? [];
+
+  if (steps.length === 0) {
+    return objective;
   }
 
   return [
-    plan.objective,
+    objective,
     "",
-    ...plan.steps.map(
+    ...steps.map(
       (step, index) =>
-        `${index + 1}. ${step.title} â€” ${step.description}`,
+        `${index + 1}. ${step.title ?? step.action ?? "Research step"} — ${step.description ?? ""}`,
     ),
   ].join("\n");
 }
 
-/**
- * Calculate how many claims are supported.
- */
 export function getSupportedClaimCount(
   claims: ResearchClaim[],
 ): number {
@@ -197,9 +189,6 @@ export function getSupportedClaimCount(
   ).length;
 }
 
-/**
- * Calculate claim verification percentage.
- */
 export function getClaimVerificationRate(
   claims: ResearchClaim[],
 ): number {
@@ -214,9 +203,6 @@ export function getClaimVerificationRate(
   );
 }
 
-/**
- * Format claim verification summary.
- */
 export function formatClaimVerification(
   claims: ResearchClaim[],
 ): string {
@@ -229,23 +215,19 @@ export function formatClaimVerification(
   return `${supported} of ${claims.length} claims supported`;
 }
 
-/**
- * Find evidence belonging to a claim.
- */
 export function getEvidenceForClaim(
   claim: ResearchClaim,
   evidence: ResearchEvidence[],
 ): ResearchEvidence[] {
-  const ids = new Set(claim.evidence_ids);
+  const ids = new Set(
+    claim.evidence_ids ?? [],
+  );
 
   return evidence.filter((item) =>
     ids.has(item.id),
   );
 }
 
-/**
- * Format an execution title.
- */
 export function formatResearchTitle(
   execution: ResearchExecution,
 ): string {
@@ -253,21 +235,22 @@ export function formatResearchTitle(
     return execution.answer.title;
   }
 
-  if (execution.query.length <= 80) {
-    return execution.query;
+  const query =
+    execution.query ??
+    "Research";
+
+  if (query.length <= 80) {
+    return query;
   }
 
-  return `${execution.query.slice(0, 77)}...`;
+  return `${query.slice(0, 77)}...`;
 }
 
-/**
- * Format execution duration.
- */
 export function formatResearchDuration(
   execution: ResearchExecution,
 ): string {
   if (!execution.started_at) {
-    return "â€”";
+    return "—";
   }
 
   const start = new Date(
@@ -285,7 +268,7 @@ export function formatResearchDuration(
     Number.isNaN(end) ||
     end < start
   ) {
-    return "â€”";
+    return "—";
   }
 
   const seconds = Math.floor(
@@ -309,20 +292,17 @@ export function formatResearchDuration(
   return `${hours}h ${remainingMinutes}m`;
 }
 
-/**
- * Format ISO timestamp for the UI.
- */
 export function formatResearchDate(
   value?: string,
 ): string {
   if (!value) {
-    return "â€”";
+    return "—";
   }
 
   const date = new Date(value);
 
   if (Number.isNaN(date.getTime())) {
-    return "â€”";
+    return "—";
   }
 
   return new Intl.DateTimeFormat(

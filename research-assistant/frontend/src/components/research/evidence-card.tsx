@@ -11,15 +11,23 @@ import type {
   Evidence,
 } from "@/research/types";
 
-const sourceConfig = {
+const sourceConfig: Record<
+  string,
+  {
+    label: string;
+    icon: typeof Search;
+  }
+> = {
   semantic: {
     label: "Semantic",
     icon: Search,
   },
+
   keyword: {
     label: "Keyword",
     icon: KeyRound,
   },
+
   graph: {
     label: "Graph",
     icon: GitBranch,
@@ -31,10 +39,12 @@ export function EvidenceCard({
 }: {
   evidence: Evidence;
 }) {
+  const sourceType =
+    evidence.sourceType ?? "semantic";
+
   const config =
-    sourceConfig[
-      evidence.sourceType
-    ];
+    sourceConfig[sourceType] ??
+    sourceConfig.semantic;
 
   const Icon = config.icon;
 
@@ -52,8 +62,7 @@ export function EvidenceCard({
                 {config.label} Evidence
               </span>
 
-              {evidence.score !==
-                undefined && (
+              {evidence.score !== undefined && (
                 <span className="text-[10px] text-muted-foreground">
                   {Math.round(
                     evidence.score * 100,
@@ -71,8 +80,7 @@ export function EvidenceCard({
           </div>
         </div>
 
-        {evidence.confidence !==
-          undefined && (
+        {evidence.confidence !== undefined && (
           <span className="rounded-full border px-2 py-1 text-[10px]">
             {Math.round(
               evidence.confidence * 100,
@@ -88,8 +96,7 @@ export function EvidenceCard({
         </p>
       </div>
 
-      {evidence.sourceType ===
-        "graph" && (
+      {sourceType === "graph" && (
         <div className="mt-3 flex items-center gap-2 rounded-xl border p-3">
           <Network className="h-4 w-4 shrink-0" />
 
@@ -122,8 +129,7 @@ export function EvidenceCard({
           </span>
         )}
 
-        {evidence.page !==
-          undefined && (
+        {evidence.page !== undefined && (
           <span>
             Page {evidence.page}
           </span>

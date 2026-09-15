@@ -242,3 +242,4 @@ export async function removeCollectionItem(
     `/collections/${collectionIdValue}/items/${paperId}`,
   );
 }
+export type { Collection, CollectionItem } from './types';

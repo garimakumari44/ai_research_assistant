@@ -13,9 +13,11 @@ import { useDocuments } from "@/lib/queries/documents";
 import { useSections } from "@/lib/queries/sections";
 import { useChunks } from "@/lib/queries/chunks";
 
-import { SectionLabel, Divider } from "./primitives";
+import type { Document } from "@/types/document";
+import type { Section } from "@/types/section";
+import type { Chunk } from "@/types/chunk";
 
-type GenericRecord = Record<string, unknown>;
+import { SectionLabel, Divider } from "./primitives";
 
 export function PaperContent({
   paperId,
@@ -47,11 +49,9 @@ export function PaperContent({
     isError: chunksIsError,
   } = useChunks(selectedSectionId);
 
-  /*
-   * -------------------------------------------------------------------------
-   * Documents
-   * -------------------------------------------------------------------------
-   */
+  /* ----------------------------------------------------------------------- */
+  /* Documents                                                               */
+  /* ----------------------------------------------------------------------- */
 
   if (documentsLoading) {
     return (
@@ -183,8 +183,10 @@ export function PaperContent({
 
               {sections && (
                 <span className="font-mono-tech text-[10px] uppercase tracking-wider text-faint">
-                  {sections.length}{" "}
-                  {sections.length === 1 ? "section" : "sections"}
+                  {sections.items.length}{" "}
+                  {sections.items.length === 1
+                    ? "section"
+                    : "sections"}
                 </span>
               )}
             </div>
@@ -193,11 +195,11 @@ export function PaperContent({
               <LoadingInline message="Loading sections..." />
             ) : sectionsIsError ? (
               <ErrorInline message="Unable to load sections for this document." />
-            ) : !sections || sections.length === 0 ? (
+            ) : !sections || sections.items.length === 0 ? (
               <EmptyInline message="No sections have been extracted for this document yet." />
             ) : (
               <div className="mt-3 space-y-2">
-                {sections.map((section) => {
+                {sections.items.map((section) => {
                   const sectionId = String(section.id);
                   const selected =
                     selectedSectionId === sectionId;
@@ -268,8 +270,10 @@ export function PaperContent({
                   <Database className="h-3 w-3 text-faint" />
 
                   <span className="font-mono-tech text-[10px] uppercase tracking-wider text-faint">
-                    {chunks.length}{" "}
-                    {chunks.length === 1 ? "chunk" : "chunks"}
+                    {chunks.items.length}{" "}
+                    {chunks.items.length === 1
+                      ? "chunk"
+                      : "chunks"}
                   </span>
                 </div>
               )}
@@ -279,20 +283,17 @@ export function PaperContent({
               <LoadingInline message="Loading section content..." />
             ) : chunksIsError ? (
               <ErrorInline message="Unable to load section content." />
-            ) : !chunks || chunks.length === 0 ? (
+            ) : !chunks || chunks.items.length === 0 ? (
               <EmptyInline message="No content chunks are available for this section yet." />
             ) : (
               <div className="mt-3 space-y-3">
-                {chunks.map((chunk, index) => {
-                  const chunkRecord =
-                    chunk as GenericRecord;
-
+                {chunks.items.map((chunk, index) => {
                   const chunkId = String(
-                    chunkRecord.id ?? index,
+                    chunk.id ?? index,
                   );
 
                   const content =
-                    getChunkContent(chunkRecord);
+                    getChunkContent(chunk);
 
                   return (
                     <article
@@ -326,9 +327,9 @@ export function PaperContent({
                           Retrieval unit
                         </span>
 
-                        {getChunkMetadata(chunkRecord) && (
+                        {getChunkMetadata(chunk) && (
                           <span className="text-[10px] text-faint">
-                            {getChunkMetadata(chunkRecord)}
+                            {getChunkMetadata(chunk)}
                           </span>
                         )}
                       </div>
@@ -344,125 +345,54 @@ export function PaperContent({
   );
 }
 
-/*
- * ===========================================================================
- * Helpers
- * ===========================================================================
- */
+/* ========================================================================== */
+/* Helpers                                                                    */
+/* ========================================================================== */
 
 function getDocumentTitle(
-  document: GenericRecord,
+  document: Document,
 ): string {
-  const title =
-    document.title ??
-    document.filename ??
-    document.file_name ??
-    document.name;
-
-  if (
-    typeof title === "string" &&
-    title.trim().length > 0
-  ) {
-    return title;
-  }
-
-  return "Untitled document";
+  return document.filename || "Untitled document";
 }
 
 function getDocumentType(
-  document: GenericRecord,
+  document: Document,
 ): string {
-  const type =
-    document.document_type ??
-    document.mime_type ??
-    document.file_type;
-
-  if (
-    typeof type === "string" &&
-    type.trim().length > 0
-  ) {
-    return type;
-  }
-
-  return "Document";
+  return document.document_type || "Document";
 }
 
 function getSectionTitle(
-  section: GenericRecord,
+  section: Section,
 ): string {
-  const title =
-    section.title ??
-    section.heading ??
-    section.name;
-
-  if (
-    typeof title === "string" &&
-    title.trim().length > 0
-  ) {
-    return title;
-  }
-
-  return "Untitled section";
+  return section.title || "Untitled section";
 }
 
 function getSectionNumber(
-  section: GenericRecord,
+  section: Section,
 ): string | null {
-  const value =
-    section.section_number ??
-    section.number ??
-    section.position;
-
-  if (
-    typeof value === "string" ||
-    typeof value === "number"
-  ) {
-    return String(value);
-  }
-
-  return null;
+  return section.section_number || null;
 }
 
 function getChunkContent(
-  chunk: GenericRecord,
+  chunk: Chunk,
 ): string {
-  const content =
-    chunk.content ??
-    chunk.context ??
-    chunk.text ??
-    chunk.text_content;
-
-  if (typeof content === "string") {
-    return content;
-  }
-
-  return "No content available.";
+  return chunk.text || "No content available.";
 }
 
 function getChunkMetadata(
-  chunk: GenericRecord,
+  chunk: Chunk,
 ): string | null {
-  const tokenCount = chunk.token_count;
-
-  if (
-    typeof tokenCount === "string" ||
-    typeof tokenCount === "number"
-  ) {
-    return `${tokenCount} tokens`;
+  if (chunk.token_count !== null) {
+    return `${chunk.token_count} tokens`;
   }
 
-  const chunkIndex = chunk.chunk_index;
-
-  if (
-    typeof chunkIndex === "string" ||
-    typeof chunkIndex === "number"
-  ) {
-    return `index ${chunkIndex}`;
+  if (chunk.position !== undefined) {
+    return `position ${chunk.position}`;
   }
 
   if (
     chunk.metadata &&
-    typeof chunk.metadata === "object"
+    Object.keys(chunk.metadata).length > 0
   ) {
     return "metadata available";
   }
@@ -470,11 +400,9 @@ function getChunkMetadata(
   return null;
 }
 
-/*
- * ===========================================================================
- * Loading / Error / Empty States
- * ===========================================================================
- */
+/* ========================================================================== */
+/* Loading / Error / Empty States                                             */
+/* ========================================================================== */
 
 function LoadingState({
   message,

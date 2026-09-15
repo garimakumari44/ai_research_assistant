@@ -14,16 +14,28 @@ export function VerificationSummary({
 }: {
   verification: VerificationSummaryType;
 }) {
-  const verified =
-    verification.status ===
-    "verified";
+  const status = verification.status ?? "failed";
 
-  const partial =
-    verification.status ===
-    "partial";
+  const verified = status === "verified";
+  const partial = status === "partial";
+
+  const confidence = verification.confidence ?? 0;
+
+  const verifiedClaims =
+    verification.verifiedClaims ?? 0;
+
+  const totalClaims =
+    verification.totalClaims ?? 0;
+
+  const checks =
+    verification.checks ?? [];
+
+  const notes =
+    verification.notes ?? [];
 
   return (
     <section className="rounded-2xl border">
+      {/* Header */}
       <div className="flex items-center justify-between border-b p-4">
         <div className="flex items-center gap-2">
           <ShieldCheck className="h-4 w-4" />
@@ -43,23 +55,23 @@ export function VerificationSummary({
           )}
 
           <span className="text-xs font-medium capitalize">
-            {verification.status}
+            {status}
           </span>
         </div>
       </div>
 
+      {/* Metrics */}
       <div className="grid gap-3 p-4 sm:grid-cols-3">
         <Metric
           label="Confidence"
           value={`${Math.round(
-            verification.confidence *
-              100,
+            confidence * 100,
           )}%`}
         />
 
         <Metric
           label="Verified claims"
-          value={`${verification.verifiedClaims}/${verification.totalClaims}`}
+          value={`${verifiedClaims}/${totalClaims}`}
         />
 
         <Metric
@@ -74,78 +86,92 @@ export function VerificationSummary({
         />
       </div>
 
-      {verification.checks.length >
-        0 && (
+      {/* Verification Checks */}
+      {checks.length > 0 && (
         <div className="border-t p-4">
           <div className="space-y-2">
-            {verification.checks.map(
-              (check) => (
+            {checks.map((check, index) => {
+              const checkId =
+                check.id ??
+                `${check.claim ?? check.name ?? "check"}-${index}`;
+
+              const checkStatus =
+                check.status ?? "failed";
+
+              const checkConfidence =
+                check.confidence ?? 0;
+
+              const checkClaim =
+                check.claim ??
+                check.label ??
+                check.name ??
+                "Verification check";
+
+              const checkExplanation =
+                check.explanation ??
+                check.message ??
+                check.details;
+
+              return (
                 <div
-                  key={check.id}
+                  key={checkId}
                   className="rounded-xl border p-3"
                 >
                   <div className="flex items-start gap-2">
-                    {check.status ===
-                    "verified" ? (
+                    {checkStatus === "verified" ||
+                    checkStatus === "passed" ? (
                       <CheckCircle2 className="mt-0.5 h-3.5 w-3.5 shrink-0" />
-                    ) : check.status ===
-                      "partial" ? (
+                    ) : checkStatus === "partial" ? (
                       <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
                     ) : (
                       <XCircle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
                     )}
 
-                    <div className="min-w-0">
+                    <div className="min-w-0 flex-1">
                       <p className="text-xs font-medium">
-                        {check.claim}
+                        {checkClaim}
                       </p>
 
-                      {check.explanation && (
+                      {checkExplanation && (
                         <p className="mt-1 text-[11px] leading-5 text-muted-foreground">
-                          {
-                            check.explanation
-                          }
+                          {checkExplanation}
                         </p>
                       )}
                     </div>
 
-                    <span className="ml-auto text-[10px] text-muted-foreground">
+                    <span className="ml-auto shrink-0 text-[10px] text-muted-foreground">
                       {Math.round(
-                        check.confidence *
-                          100,
+                        checkConfidence * 100,
                       )}
                       %
                     </span>
                   </div>
                 </div>
-              ),
-            )}
+              );
+            })}
           </div>
         </div>
       )}
 
-      {verification.notes &&
-        verification.notes.length >
-          0 && (
-          <div className="border-t p-4">
-            <p className="text-xs font-semibold">
-              Notes
-            </p>
+      {/* Notes */}
+      {notes.length > 0 && (
+        <div className="border-t p-4">
+          <p className="text-xs font-semibold">
+            Notes
+          </p>
 
-            <ul className="mt-2 space-y-1">
-              {verification.notes.map(
-                (note) => (
-                  <li
-                    key={note}
-                    className="text-xs text-muted-foreground"
-                  >
-                    {note}
-                  </li>
-                ),
-              )}
-            </ul>
-          </div>
-        )}
+          <ul className="mt-2 space-y-1">
+            {notes.map((note, index) => (
+              <li
+                key={`${note}-${index}`}
+                className="text-xs text-muted-foreground"
+              >
+                {note}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
     </section>
   );
 }

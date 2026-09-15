@@ -4,17 +4,44 @@ import {
   Check,
   Circle,
   Loader2,
-  Search,
   Sparkles,
 } from "lucide-react";
 
 import type {
   ResearchPlan as ResearchPlanType,
+  ResearchStatus,
   ResearchTaskStatus,
 } from "@/research/types";
 
 interface ResearchPlanProps {
-  plan?: ResearchPlanType;
+  plan?: ResearchPlanType | null;
+}
+
+function normalizeTaskStatus(
+  status?: ResearchStatus | ResearchTaskStatus,
+): ResearchTaskStatus {
+  switch (status) {
+    case "completed":
+    case "passed":
+    case "verified":
+    case "partial":
+    case "failed":
+    case "skipped":
+    case "running":
+    case "pending":
+      return status;
+
+    case "planning":
+    case "queued":
+    case "searching":
+    case "retrieving":
+    case "synthesizing":
+    case "verifying":
+    case "cancelled":
+    case "idle":
+    default:
+      return "pending";
+  }
 }
 
 function StatusIcon({
@@ -22,10 +49,12 @@ function StatusIcon({
 }: {
   status: ResearchTaskStatus;
 }) {
-  if (status === "completed") {
-    return (
-      <Check className="h-3.5 w-3.5" />
-    );
+  if (
+    status === "completed" ||
+    status === "passed" ||
+    status === "verified"
+  ) {
+    return <Check className="h-3.5 w-3.5" />;
   }
 
   if (status === "running") {
@@ -51,6 +80,8 @@ export function ResearchPlan({
   if (!plan) {
     return null;
   }
+
+  const steps = plan.steps ?? [];
 
   return (
     <section className="rounded-2xl border bg-background">
@@ -86,38 +117,48 @@ export function ResearchPlan({
           </p>
         </div>
 
-        <div className="space-y-3">
-          {plan.steps.map((step) => (
-            <div
-              key={step.id}
-              className="flex gap-3"
-            >
-              <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border">
-                <StatusIcon
-                  status={step.status}
-                />
-              </div>
+        {steps.length > 0 ? (
+          <div className="space-y-3">
+            {steps.map((step) => {
+              const status = normalizeTaskStatus(
+                step.status,
+              );
 
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center justify-between gap-3">
-                  <p className="text-sm font-medium">
-                    {step.order}. {step.title}
-                  </p>
+              return (
+                <div
+                  key={step.id}
+                  className="flex gap-3"
+                >
+                  <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border">
+                    <StatusIcon status={status} />
+                  </div>
 
-                  {step.strategy && (
-                    <span className="text-[10px] uppercase text-muted-foreground">
-                      {step.strategy}
-                    </span>
-                  )}
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center justify-between gap-3">
+                      <p className="text-sm font-medium">
+                        {step.order}. {step.title}
+                      </p>
+
+                      {step.strategy && (
+                        <span className="text-[10px] uppercase text-muted-foreground">
+                          {step.strategy}
+                        </span>
+                      )}
+                    </div>
+
+                    <p className="mt-1 text-xs leading-5 text-muted-foreground">
+                      {step.description}
+                    </p>
+                  </div>
                 </div>
-
-                <p className="mt-1 text-xs leading-5 text-muted-foreground">
-                  {step.description}
-                </p>
-              </div>
-            </div>
-          ))}
-        </div>
+              );
+            })}
+          </div>
+        ) : (
+          <div className="rounded-xl border border-dashed p-4 text-center text-xs text-muted-foreground">
+            No research steps are available yet.
+          </div>
+        )}
       </div>
     </section>
   );

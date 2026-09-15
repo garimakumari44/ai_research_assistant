@@ -174,7 +174,7 @@ export default function CollectionDetailPage() {
             ...currentCollection,
             item_count: Math.max(
               0,
-              Number(currentCollection.item_count ?? items.length) - 1,
+              Number(currentCollection.paper_count ?? items.length) - 1,
             ),
           };
         });
@@ -282,7 +282,7 @@ export default function CollectionDetailPage() {
     "Organize and explore papers collected for this research topic.";
 
   const itemCount =
-    collection.item_count ??
+    collection.paper_count ??
     collection.paper_count ??
     items.length;
 
@@ -448,3 +448,4 @@ export default function CollectionDetailPage() {
     </AppShell>
   );
 }
+

@@ -5,7 +5,7 @@ import { SectionLabel, MetricLabel } from '../../components/primitives';
 import { cn } from '../lib/utils';
 import { useGraph } from '@/graph/hooks/use-graph';
 
-import type { GraphNode } from '@/adaptive-rag/types';
+import type { GraphNode } from '@/graph/types';
 
 const nodeTypeFill: Record<string, string> = {
   paper: '#3B82F6',
@@ -26,11 +26,13 @@ const filterTypes = [
 
 type FilterType = (typeof filterTypes)[number];
 
-export function ProjectMap({ projectId }: { projectId: string }) {
+export function ProjectMap({ projectId: _projectId }: { projectId: string }) {
   const [selected, setSelected] = useState<GraphNode | null>(null);
   const [activeFilter, setActiveFilter] = useState<FilterType>('all');
 
-  const { data, isLoading, isError, refetch } = useGraph(projectId);
+  const { data, isLoading, isError, refetch } = useGraph({
+    depth: 2,
+  });
 
   const nodes = data?.nodes ?? [];
   const edges = data?.edges ?? [];
@@ -52,8 +54,8 @@ export function ProjectMap({ projectId }: { projectId: string }) {
     () =>
       edges.filter(
         (edge) =>
-          visibleIds.has(edge.from) &&
-          visibleIds.has(edge.to),
+          visibleIds.has(edge.source) &&
+          visibleIds.has(edge.target),
       ),
     [edges, visibleIds],
   );
@@ -108,29 +110,44 @@ export function ProjectMap({ projectId }: { projectId: string }) {
             className="block"
           >
             {visibleEdges.map((edge) => {
-              const from = nodes.find((node) => node.id === edge.from);
-              const to = nodes.find((node) => node.id === edge.to);
+              const from = nodes.find(
+                (node) => node.id === edge.source,
+              );
+              const to = nodes.find(
+                (node) => node.id === edge.target,
+              );
 
               if (!from || !to) {
                 return null;
               }
 
+              const fromX = from.x ?? from.position?.x ?? 0;
+              const fromY = from.y ?? from.position?.y ?? 0;
+              const toX = to.x ?? to.position?.x ?? 0;
+              const toY = to.y ?? to.position?.y ?? 0;
+              const strength = edge.strength ?? 1;
+
               return (
                 <line
-                  key={edge.id ?? `${edge.from}-${edge.to}`}
-                  x1={from.x}
-                  y1={from.y}
-                  x2={to.x}
-                  y2={to.y}
+                  key={edge.id}
+                  x1={fromX}
+                  y1={fromY}
+                  x2={toX}
+                  y2={toY}
                   stroke="hsl(var(--strong-border))"
-                  strokeWidth={Math.max(1, edge.strength * 1.5)}
+                  strokeWidth={Math.max(1, strength * 1.5)}
                   opacity={0.5}
                 />
               );
             })}
 
             {visibleNodes.map((node) => {
-              const fill = nodeTypeFill[node.type] ?? '#3B82F6';
+              const fill =
+                nodeTypeFill[node.type] ?? '#3B82F6';
+
+              const x = node.x ?? node.position?.x ?? 0;
+              const y = node.y ?? node.position?.y ?? 0;
+              const size = node.size ?? 20;
 
               return (
                 <g
@@ -139,9 +156,9 @@ export function ProjectMap({ projectId }: { projectId: string }) {
                   className="cursor-pointer"
                 >
                   <circle
-                    cx={node.x}
-                    cy={node.y}
-                    r={node.size / 2}
+                    cx={x}
+                    cy={y}
+                    r={size / 2}
                     fill={fill}
                     opacity={
                       selected && selected.id !== node.id
@@ -151,9 +168,9 @@ export function ProjectMap({ projectId }: { projectId: string }) {
                   />
 
                   <circle
-                    cx={node.x}
-                    cy={node.y}
-                    r={node.size / 2}
+                    cx={x}
+                    cy={y}
+                    r={size / 2}
                     fill="none"
                     stroke={fill}
                     strokeWidth={
@@ -162,8 +179,8 @@ export function ProjectMap({ projectId }: { projectId: string }) {
                   />
 
                   <text
-                    x={node.x}
-                    y={node.y + node.size / 2 + 14}
+                    x={x}
+                    y={y + size / 2 + 14}
                     textAnchor="middle"
                     className="fill-muted-foreground text-[10px] font-mono-tech pointer-events-none select-none"
                   >
@@ -193,8 +210,7 @@ export function ProjectMap({ projectId }: { projectId: string }) {
                 <div
                   className="h-2 w-2 rounded-full"
                   style={{
-                    background:
-                      nodeTypeFill[type],
+                    background: nodeTypeFill[type],
                   }}
                 />
 
@@ -248,8 +264,8 @@ export function ProjectMap({ projectId }: { projectId: string }) {
                     {
                       visibleEdges.filter(
                         (edge) =>
-                          edge.from === selected.id ||
-                          edge.to === selected.id,
+                          edge.source === selected.id ||
+                          edge.target === selected.id,
                       ).length
                     }
                   </p>

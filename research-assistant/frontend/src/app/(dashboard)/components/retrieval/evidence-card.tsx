@@ -85,9 +85,9 @@ export function EvidenceCard({
   const rank =
     evidence?.rank ??
     result.rank ??
-    index !== undefined
+    (index !== undefined
       ? index + 1
-      : null;
+      : null);
 
   const provenance =
     evidence?.provenance ??

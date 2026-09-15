@@ -14,18 +14,10 @@ import type { ResearchReport } from "@/research/types";
 
 import { ResearchInput } from "./research-input";
 
-/* ========================================================================== */
-/* Props                                                                      */
-/* ========================================================================== */
-
 export interface ResearchPageProps {
   projectId?: string;
   collectionId?: string;
 }
-
-/* ========================================================================== */
-/* Page                                                                       */
-/* ========================================================================== */
 
 export function ResearchPage({
   projectId: _projectId,
@@ -39,33 +31,8 @@ export function ResearchPage({
     clear,
   } = useResearch();
 
-  /* ------------------------------------------------------------------------ */
-  /* Run research                                                             */
-  /* ------------------------------------------------------------------------ */
-
   async function handleResearch(query: string) {
     const question = query.trim();
-
-    /*
-     * Research belongs to the Assistant/Research Engine flow.
-     *
-     * IMPORTANT:
-     * This page must NOT call Adaptive RAG directly.
-     *
-     * The routing boundary is:
-     *
-     *   Research Page
-     *        ↓
-     *   useResearch()
-     *        ↓
-     *   Research / Assistant API
-     *        ↓
-     *   Assistant orchestration
-     *        ↓
-     *   LLM + research tools
-     *
-     * Adaptive RAG is reserved for the Explore flow.
-     */
 
     if (!question || question.length < 3) {
       return;
@@ -80,31 +47,13 @@ export function ResearchPage({
         include_docs: true,
       });
     } catch {
-      /*
-       * useResearch stores the error in its own state.
-       *
-       * Catching the error here prevents Next.js from reporting
-       * an unhandled promise rejection from the event handler.
-       */
+      // useResearch stores the error in its own state.
     }
   }
 
-  /* ------------------------------------------------------------------------ */
-  /* Derived state                                                            */
-  /* ------------------------------------------------------------------------ */
-
-  const hasResearch = Boolean(report);
-
-  /* ------------------------------------------------------------------------ */
-  /* Render                                                                   */
-  /* ------------------------------------------------------------------------ */
-
   return (
     <div className="flex h-full min-h-0 flex-col bg-background">
-      {/* ------------------------------------------------------------------ */}
-      {/* Header                                                             */}
-      {/* ------------------------------------------------------------------ */}
-
+      {/* Header */}
       <header className="shrink-0 border-b">
         <div className="flex items-center justify-between px-6 py-4">
           <div className="flex items-center gap-3">
@@ -140,7 +89,7 @@ export function ResearchPage({
               Verified
             </div>
 
-            {hasResearch && (
+            {report && (
               <button
                 type="button"
                 onClick={clear}
@@ -158,20 +107,17 @@ export function ResearchPage({
         </div>
       </header>
 
-      {/* ------------------------------------------------------------------ */}
-      {/* Main                                                               */}
-      {/* ------------------------------------------------------------------ */}
-
+      {/* Main */}
       <main className="min-h-0 flex-1 overflow-y-auto">
         <div className="mx-auto max-w-6xl px-6 py-6">
-          {!hasResearch ? (
+          {report ? (
+            <ResearchReportView
+              report={report}
+            />
+          ) : (
             <ResearchWelcome
               onExample={handleResearch}
               loading={loading}
-            />
-          ) : (
-            <ResearchReportView
-              report={report}
             />
           )}
 
@@ -183,10 +129,7 @@ export function ResearchPage({
         </div>
       </main>
 
-      {/* ------------------------------------------------------------------ */}
-      {/* Input                                                              */}
-      {/* ------------------------------------------------------------------ */}
-
+      {/* Input */}
       <ResearchInput
         loading={loading}
         onSubmit={handleResearch}
@@ -195,21 +138,19 @@ export function ResearchPage({
   );
 }
 
-/* ========================================================================== */
-/* Research report view                                                       */
-/* ========================================================================== */
-
 function ResearchReportView({
   report,
 }: {
   report: ResearchReport;
 }) {
+  const sections = report.sections ?? [];
+  const evidence = report.evidence ?? [];
+  const sources = report.sources ?? [];
+  const citations = report.citations ?? [];
+
   return (
     <div className="space-y-6">
-      {/* ------------------------------------------------------------------ */}
-      {/* Report header                                                      */}
-      {/* ------------------------------------------------------------------ */}
-
+      {/* Report header */}
       <div className="rounded-2xl border bg-muted/20 p-5">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
@@ -230,10 +171,7 @@ function ResearchReportView({
         </div>
       </div>
 
-      {/* ------------------------------------------------------------------ */}
-      {/* Executive summary                                                  */}
-      {/* ------------------------------------------------------------------ */}
-
+      {/* Executive summary */}
       <section className="rounded-2xl border p-6">
         <div className="mb-3 flex items-center gap-2">
           <Sparkles className="h-4 w-4" />
@@ -248,11 +186,8 @@ function ResearchReportView({
         </p>
       </section>
 
-      {/* ------------------------------------------------------------------ */}
-      {/* Research sections                                                  */}
-      {/* ------------------------------------------------------------------ */}
-
-      {report.sections.length > 0 && (
+      {/* Research sections */}
+      {sections.length > 0 && (
         <section className="space-y-4">
           <div>
             <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
@@ -264,7 +199,7 @@ function ResearchReportView({
             </h3>
           </div>
 
-          {report.sections.map((section, index) => (
+          {sections.map((section, index) => (
             <article
               key={`${section.title}-${index}`}
               className="rounded-2xl border p-6"
@@ -277,21 +212,23 @@ function ResearchReportView({
                 {section.content}
               </p>
 
-              {section.evidence_ids.length > 0 && (
+              {section.evidence_ids?.length > 0 && (
                 <div className="mt-4">
                   <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
                     Supporting Evidence
                   </p>
 
                   <div className="mt-2 flex flex-wrap gap-2">
-                    {section.evidence_ids.map((evidenceId) => (
-                      <span
-                        key={evidenceId}
-                        className="rounded-md border px-2 py-1 text-[10px] text-muted-foreground"
-                      >
-                        {evidenceId}
-                      </span>
-                    ))}
+                    {section.evidence_ids.map(
+                      (evidenceId) => (
+                        <span
+                          key={evidenceId}
+                          className="rounded-md border px-2 py-1 text-[10px] text-muted-foreground"
+                        >
+                          {evidenceId}
+                        </span>
+                      ),
+                    )}
                   </div>
                 </div>
               )}
@@ -300,21 +237,15 @@ function ResearchReportView({
         </section>
       )}
 
-      {/* ------------------------------------------------------------------ */}
-      {/* Comparison                                                         */}
-      {/* ------------------------------------------------------------------ */}
-
+      {/* Comparison */}
       {report.comparison && (
         <ComparisonSection
           comparison={report.comparison}
         />
       )}
 
-      {/* ------------------------------------------------------------------ */}
-      {/* Evidence                                                           */}
-      {/* ------------------------------------------------------------------ */}
-
-      {report.evidence.length > 0 && (
+      {/* Evidence */}
+      {evidence.length > 0 && (
         <section className="rounded-2xl border p-6">
           <div className="mb-4">
             <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
@@ -327,7 +258,7 @@ function ResearchReportView({
           </div>
 
           <div className="space-y-4">
-            {report.evidence.map((item) => (
+            {evidence.map((item) => (
               <article
                 key={item.id}
                 className="rounded-xl border bg-muted/10 p-4"
@@ -340,7 +271,10 @@ function ResearchReportView({
                   <div className="flex gap-2">
                     <span className="rounded-md border px-2 py-1 text-[10px] text-muted-foreground">
                       Confidence:{" "}
-                      {Math.round(item.confidence * 100)}%
+                      {Math.round(
+                        item.confidence * 100,
+                      )}
+                      %
                     </span>
 
                     <span className="rounded-md border px-2 py-1 text-[10px] text-muted-foreground">
@@ -363,11 +297,8 @@ function ResearchReportView({
         </section>
       )}
 
-      {/* ------------------------------------------------------------------ */}
-      {/* Sources                                                            */}
-      {/* ------------------------------------------------------------------ */}
-
-      {report.sources.length > 0 && (
+      {/* Sources */}
+      {sources.length > 0 && (
         <section className="rounded-2xl border p-6">
           <div className="mb-4">
             <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
@@ -380,7 +311,7 @@ function ResearchReportView({
           </div>
 
           <div className="grid gap-3 md:grid-cols-2">
-            {report.sources.map((source) => (
+            {sources.map((source) => (
               <article
                 key={source.id}
                 className="rounded-xl border p-4"
@@ -397,7 +328,7 @@ function ResearchReportView({
                   </div>
                 </div>
 
-                {source.authors.length > 0 && (
+                {source.authors?.length > 0 && (
                   <p className="mt-3 text-xs text-muted-foreground">
                     {source.authors.join(", ")}
                   </p>
@@ -419,11 +350,8 @@ function ResearchReportView({
         </section>
       )}
 
-      {/* ------------------------------------------------------------------ */}
-      {/* Citations                                                          */}
-      {/* ------------------------------------------------------------------ */}
-
-      {report.citations.length > 0 && (
+      {/* Citations */}
+      {citations.length > 0 && (
         <section className="rounded-2xl border p-6">
           <div className="mb-4">
             <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
@@ -436,7 +364,7 @@ function ResearchReportView({
           </div>
 
           <div className="space-y-3">
-            {report.citations.map((citation) => (
+            {citations.map((citation) => (
               <article
                 key={citation.id}
                 className="rounded-xl border p-4"
@@ -464,14 +392,12 @@ function ResearchReportView({
   );
 }
 
-/* ========================================================================== */
-/* Comparison                                                                */
-/* ========================================================================== */
-
 function ComparisonSection({
   comparison,
 }: {
-  comparison: NonNullable<ResearchReport["comparison"]>;
+  comparison: NonNullable<
+    ResearchReport["comparison"]
+  >;
 }) {
   return (
     <section className="rounded-2xl border p-6">
@@ -487,14 +413,16 @@ function ComparisonSection({
 
       {comparison.criteria.length > 0 && (
         <div className="mb-5 flex flex-wrap gap-2">
-          {comparison.criteria.map((criterion) => (
-            <span
-              key={criterion}
-              className="rounded-md border px-2 py-1 text-[10px] text-muted-foreground"
-            >
-              {criterion}
-            </span>
-          ))}
+          {comparison.criteria.map(
+            (criterion) => (
+              <span
+                key={criterion}
+                className="rounded-md border px-2 py-1 text-[10px] text-muted-foreground"
+              >
+                {criterion}
+              </span>
+            ),
+          )}
         </div>
       )}
 
@@ -502,27 +430,31 @@ function ComparisonSection({
         <div className="overflow-x-auto rounded-xl border">
           <table className="w-full min-w-[600px] text-sm">
             <tbody>
-              {comparison.comparison_table.map((row, index) => (
-                <tr
-                  key={index}
-                  className="border-b last:border-b-0"
-                >
-                  {Object.entries(row).map(([key, value]) => (
-                    <td
-                      key={key}
-                      className="p-3 align-top"
-                    >
-                      <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-                        {key}
-                      </div>
+              {comparison.comparison_table.map(
+                (row, index) => (
+                  <tr
+                    key={index}
+                    className="border-b last:border-b-0"
+                  >
+                    {Object.entries(row).map(
+                      ([key, value]) => (
+                        <td
+                          key={key}
+                          className="p-3 align-top"
+                        >
+                          <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                            {key}
+                          </div>
 
-                      <div className="mt-1 leading-6">
-                        {value}
-                      </div>
-                    </td>
-                  ))}
-                </tr>
-              ))}
+                          <div className="mt-1 leading-6">
+                            {String(value)}
+                          </div>
+                        </td>
+                      ),
+                    )}
+                  </tr>
+                ),
+              )}
             </tbody>
           </table>
         </div>
@@ -530,10 +462,6 @@ function ComparisonSection({
     </section>
   );
 }
-
-/* ========================================================================== */
-/* Welcome                                                                    */
-/* ========================================================================== */
 
 function ResearchWelcome({
   onExample,
@@ -581,10 +509,6 @@ function ResearchWelcome({
     </div>
   );
 }
-
-/* ========================================================================== */
-/* Error panel                                                                */
-/* ========================================================================== */
 
 function ErrorPanel({
   message,

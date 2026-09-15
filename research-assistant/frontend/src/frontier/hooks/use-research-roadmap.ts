@@ -1,7 +1,7 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
-import { api } from '@/lib/api';
+import { apiGet } from '@/lib/api';
 
 export type RoadmapStepType =
   | 'gap'
@@ -39,13 +39,14 @@ export function useResearchRoadmap(projectId: string) {
     enabled: Boolean(projectId),
 
     queryFn: async (): Promise<ResearchRoadmapResponse> => {
-      const response = await api.get<ResearchRoadmapResponse>(
+      const response = await apiGet<ResearchRoadmapResponse>(
         `/api/v1/projects/${projectId}/frontier/roadmap`,
       );
 
-      return response.data;
+      return response;
     },
 
     staleTime: 5 * 60_000,
   });
 }
+

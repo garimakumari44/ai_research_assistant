@@ -38,9 +38,7 @@ export function useGraphTraversal(
     GraphTraversalResponse,
     Error
   >({
-    queryKey: graphKeys.traversal(
-      request ?? {},
-    ),
+    queryKey: graphKeys.traversal(request?.node_id ?? "", request?.depth ?? 2),
 
     queryFn: () => {
       if (!request?.node_id) {
@@ -81,3 +79,5 @@ export function useTraverseGraph() {
     mutationFn: traverseGraph,
   });
 }
+
+

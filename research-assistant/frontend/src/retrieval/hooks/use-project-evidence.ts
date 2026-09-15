@@ -1,7 +1,7 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
-import { api } from '@/lib/api';
+import { apiGet } from '@/lib/api';
 
 export type EvidenceTrustCategory =
   | 'evidence'
@@ -11,22 +11,15 @@ export type EvidenceTrustCategory =
 
 export interface ProjectEvidence {
   id: string;
-
   quote: string;
-
   paperId?: string;
   paperTitle: string;
-
   section?: string;
   page?: number;
-
   category?: string;
-
   trustCategory: EvidenceTrustCategory;
-
   relevance: number;
   confidence?: number;
-
   chunkId?: string;
   documentId?: string;
 
@@ -66,22 +59,27 @@ export function useProjectEvidence(
     enabled: Boolean(projectId),
 
     queryFn: async (): Promise<ProjectEvidenceResponse> => {
-      const response = await api.get<ProjectEvidenceResponse>(
-        `/api/v1/projects/${projectId}/evidence`,
-        {
-          params: {
-            category:
-              options.category && options.category !== 'all'
-                ? options.category
-                : undefined,
+      const params = new URLSearchParams();
 
-            limit: options.limit,
-            query: options.query,
-          },
-        },
+      if (options.category && options.category !== 'all') {
+        params.set('category', options.category);
+      }
+
+      if (options.limit !== undefined) {
+        params.set('limit', String(options.limit));
+      }
+
+      if (options.query) {
+        params.set('query', options.query);
+      }
+
+      const queryString = params.toString();
+
+      return apiGet<ProjectEvidenceResponse>(
+        `/api/v1/projects/${projectId}/evidence${
+          queryString ? `?${queryString}` : ''
+        }`,
       );
-
-      return response.data;
     },
 
     staleTime: 60_000,

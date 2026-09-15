@@ -1,26 +1,19 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
-import { api } from '@/lib/api';
+import { apiGet } from '@/lib/api';
 
 export interface ProjectPaper {
   id: string;
   title: string;
-
   authors: string[];
-
   venue?: string;
   year?: number;
-
   abstract?: string;
-
   tags: string[];
-
   citations?: number;
-
   doi?: string;
   arxivId?: string;
-
   metadata?: Record<string, unknown>;
 }
 
@@ -40,7 +33,6 @@ export interface UseProjectPapersOptions {
   venue?: string;
   author?: string;
   dataset?: string;
-
   page?: number;
   pageSize?: number;
 }
@@ -60,24 +52,28 @@ export function useProjectPapers(
     enabled: Boolean(projectId),
 
     queryFn: async (): Promise<ProjectPapersResponse> => {
-      const response = await api.get<ProjectPapersResponse>(
-        `/api/v1/projects/${projectId}/papers`,
-        {
-          params: {
-            q: options.query,
-            year: options.year,
-            topic: options.topic,
-            method: options.method,
-            venue: options.venue,
-            author: options.author,
-            dataset: options.dataset,
-            page: options.page,
-            page_size: options.pageSize,
-          },
-        },
-      );
+      const params = new URLSearchParams();
 
-      return response.data;
+      if (options.query) params.set('q', options.query);
+      if (options.year !== undefined) params.set('year', String(options.year));
+      if (options.topic) params.set('topic', options.topic);
+      if (options.method) params.set('method', options.method);
+      if (options.venue) params.set('venue', options.venue);
+      if (options.author) params.set('author', options.author);
+      if (options.dataset) params.set('dataset', options.dataset);
+      if (options.page !== undefined) params.set('page', String(options.page));
+
+      if (options.pageSize !== undefined) {
+        params.set('page_size', String(options.pageSize));
+      }
+
+      const queryString = params.toString();
+
+      return apiGet<ProjectPapersResponse>(
+        `/api/v1/projects/${projectId}/papers${
+          queryString ? `?${queryString}` : ''
+        }`,
+      );
     },
 
     staleTime: 60_000,

@@ -183,32 +183,18 @@ export function ProjectGaps({
               </MetricLabel>
 
               <p className="font-mono-tech text-lg text-secondary-foreground tabular-nums">
-                {gap.relevantPapers ?? 0}
+                {gap.relatedPapers}
               </p>
-            </div>
-
-            <div>
+            </div>            <div>
               <MetricLabel>
-                Opportunity
+                Importance
               </MetricLabel>
 
               <p className="font-mono-tech text-lg text-primary-soft tabular-nums">
-                {gap.opportunity ?? '—'}
+                {gap.importance}
               </p>
             </div>
           </div>
-
-          {gap.suggestedDirection && (
-            <div className="mt-6 pt-5 border-t border-border">
-              <SectionLabel>
-                Suggested Direction
-              </SectionLabel>
-
-              <p className="text-[13px] text-secondary-foreground leading-relaxed">
-                {gap.suggestedDirection}
-              </p>
-            </div>
-          )}
         </div>
       </div>
     </div>

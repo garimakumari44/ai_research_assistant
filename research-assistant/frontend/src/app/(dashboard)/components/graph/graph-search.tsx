@@ -1,28 +1,85 @@
+
 "use client";
 
-import { Search, X } from "lucide-react";
+import {
+  Search,
+  X,
+} from "lucide-react";
 
-import { useState } from "react";
+import {
+  useEffect,
+  useState,
+} from "react";
 
 interface GraphSearchProps {
-  onSearch: (query: string) => void;
+  value?: string;
+  onChange?: (value: string) => void;
+  onClear?: () => void;
+
+  /**
+   * Kept for compatibility with callers
+   * that use submit-based graph searching.
+   */
+  onSearch?: (query: string) => void;
+
   placeholder?: string;
 }
 
 export function GraphSearch({
+  value,
+  onChange,
+  onClear,
   onSearch,
   placeholder = "Search graph...",
 }: GraphSearchProps) {
-  const [query, setQuery] = useState("");
+  const isControlled =
+    value !== undefined;
 
-  const handleSubmit = (event: React.FormEvent) => {
+  const [internalQuery, setInternalQuery] =
+    useState("");
+
+  const query = isControlled
+    ? value
+    : internalQuery;
+
+  useEffect(() => {
+    if (isControlled) {
+      return;
+    }
+
+    setInternalQuery(value ?? "");
+  }, [value, isControlled]);
+
+  const updateQuery = (
+    nextValue: string,
+  ) => {
+    if (!isControlled) {
+      setInternalQuery(nextValue);
+    }
+
+    onChange?.(nextValue);
+  };
+
+  const handleSubmit = (
+    event: React.FormEvent<HTMLFormElement>,
+  ) => {
     event.preventDefault();
-    onSearch(query.trim());
+
+    const normalizedQuery =
+      query.trim();
+
+    onSearch?.(normalizedQuery);
+    onChange?.(normalizedQuery);
   };
 
   const clear = () => {
-    setQuery("");
-    onSearch("");
+    if (!isControlled) {
+      setInternalQuery("");
+    }
+
+    onChange?.("");
+    onClear?.();
+    onSearch?.("");
   };
 
   return (
@@ -34,7 +91,11 @@ export function GraphSearch({
 
       <input
         value={query}
-        onChange={(event) => setQuery(event.target.value)}
+        onChange={(event) =>
+          updateQuery(
+            event.target.value,
+          )
+        }
         placeholder={placeholder}
         className="h-10 min-w-0 flex-1 bg-transparent px-2 text-sm text-zinc-200 outline-none placeholder:text-zinc-600"
       />
@@ -52,3 +113,4 @@ export function GraphSearch({
     </form>
   );
 }
+

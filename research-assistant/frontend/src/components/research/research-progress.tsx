@@ -32,25 +32,47 @@ const stages = [
   },
 ] as const;
 
-const order: Record<
-  ResearchStatus,
-  number
-> = {
-  idle: 0,
-  planning: 1,
-  retrieving: 2,
-  synthesizing: 3,
-  verifying: 4,
-  completed: 5,
-  failed: -1,
-};
+function getProgressOrder(
+  status: ResearchStatus,
+): number {
+  switch (status) {
+    case "idle":
+      return 0;
+
+    case "pending":
+    case "queued":
+    case "planning":
+      return 1;
+
+    case "searching":
+    case "retrieving":
+      return 2;
+
+    case "running":
+    case "synthesizing":
+      return 3;
+
+    case "verifying":
+      return 4;
+
+    case "completed":
+      return 5;
+
+    case "failed":
+    case "cancelled":
+      return -1;
+
+    default:
+      return 0;
+  }
+}
 
 export function ResearchProgress({
   status,
 }: {
   status: ResearchStatus;
 }) {
-  const current = order[status];
+  const current = getProgressOrder(status);
 
   return (
     <div className="rounded-2xl border p-4">
@@ -64,14 +86,17 @@ export function ResearchProgress({
 
       <div className="grid gap-2 md:grid-cols-5">
         {stages.map((stage, index) => {
-          const stageIndex =
-            index + 1;
+          const stageIndex = index + 1;
 
           const active =
             current === stageIndex;
 
           const complete =
             current > stageIndex;
+
+          const failed =
+            status === "failed" &&
+            stageIndex === Math.max(current + 1, 1);
 
           return (
             <div
@@ -87,6 +112,8 @@ export function ResearchProgress({
                   <Check className="h-3.5 w-3.5" />
                 ) : active ? (
                   <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                ) : failed ? (
+                  <Circle className="h-3.5 w-3.5 text-destructive" />
                 ) : (
                   <Circle className="h-3.5 w-3.5 text-muted-foreground" />
                 )}

@@ -21,7 +21,7 @@ export function ResearchSession({
   return (
     <div className="space-y-4">
       <ResearchProgress
-        status={session.status}
+        status={session.status ?? "idle"}
       />
 
       <div className="grid gap-2 sm:grid-cols-4">
@@ -56,7 +56,7 @@ export function ResearchSession({
           icon={<Clock3 className="h-3.5 w-3.5" />}
           label="Duration"
           value={
-            session.durationMs
+            session.durationMs !== undefined
               ? `${Math.round(
                   session.durationMs,
                 )}ms`
@@ -66,11 +66,11 @@ export function ResearchSession({
       </div>
 
       <ResearchPlan
-        plan={session.plan}
+        plan={session.plan ?? undefined}
       />
 
       <ResearchTaskList
-        tasks={session.tasks}
+        tasks={session.tasks ?? []}
       />
     </div>
   );

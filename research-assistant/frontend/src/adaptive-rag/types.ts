@@ -501,6 +501,59 @@ export interface ResearchContext {
   duration_ms?: number;
 }
 
+
+/* -------------------------------------------------------------------------- */
+/* Trace                                                                      */
+/* -------------------------------------------------------------------------- */
+
+export type TraceStepStatus =
+  | "pending"
+  | "running"
+  | "completed"
+  | "failed"
+  | "skipped";
+
+export interface RAGTraceStep {
+  id?: string;
+
+  index: number;
+
+  title?: string;
+
+  name?: string;
+
+  description?: string;
+
+  type?: string;
+
+  status?: TraceStepStatus;
+
+  duration_ms?: number;
+
+  started_at?: number;
+
+  finished_at?: number;
+
+  strategy?: string;
+
+  error?: string;
+
+  metadata?: Record<string, unknown>;
+}
+
+export interface AdaptiveRAGTrace {
+  execution_id?: string;
+
+  query?: string;
+
+  status?: ExecutionStatus;
+
+  steps: RAGTraceStep[];
+
+  total_duration_ms?: number;
+
+  metadata?: Record<string, unknown>;
+}
 /* -------------------------------------------------------------------------- */
 /* Execution State                                                            */
 /* -------------------------------------------------------------------------- */

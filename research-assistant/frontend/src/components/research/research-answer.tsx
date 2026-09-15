@@ -1,4 +1,3 @@
-
 import {
   CheckCircle2,
   Sparkles,
@@ -76,7 +75,7 @@ export function ResearchAnswer({
         <div className="px-5 py-6 sm:px-7 sm:py-7">
           <article className="max-w-4xl">
             <div className="whitespace-pre-wrap text-[14px] leading-7 text-foreground/90">
-              {answer.answer}
+              {answer.answer ?? answer.content ?? ""}
             </div>
           </article>
         </div>
@@ -104,11 +103,11 @@ export function ResearchAnswer({
       {/* ------------------------------------------------------------------ */}
 
       <EvidenceList
-        evidence={answer.evidence}
+        evidence={answer.evidence ?? []}
       />
 
       <CitationList
-        citations={answer.citations}
+        citations={answer.citations ?? []}
       />
 
       {answer.verification && (
@@ -119,4 +118,3 @@ export function ResearchAnswer({
     </section>
   );
 }
-

@@ -1,7 +1,7 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
-import { api } from '@/lib/api';
+import { apiGet } from '@/lib/api';
 
 export type ContradictionStance =
   | 'support'
@@ -26,7 +26,6 @@ export interface ProjectContradiction {
   qualifying: number;
 
   reasons: string[];
-
   papers: ContradictionPaper[];
 
   confidence?: number;
@@ -37,20 +36,36 @@ export interface ProjectContradiction {
 export interface ProjectContradictionsResponse {
   projectId: string;
   contradictions: ProjectContradiction[];
+  items: ProjectContradiction[];
   total: number;
 }
 
 export function useProjectContradictions(projectId: string) {
-  return useQuery({
+  return useQuery<ProjectContradictionsResponse>({
     queryKey: ['projects', projectId, 'contradictions'],
     enabled: Boolean(projectId),
 
     queryFn: async (): Promise<ProjectContradictionsResponse> => {
-      const response = await api.get<ProjectContradictionsResponse>(
-        `/api/v1/projects/${projectId}/contradictions`,
-      );
+      const response = await apiGet<
+        Omit<ProjectContradictionsResponse, 'items'> & {
+          items?: ProjectContradiction[];
+          contradictions?: ProjectContradiction[];
+        }
+      >(`/api/v1/projects/${projectId}/contradictions`);
 
-      return response.data;
+      const items =
+        response.items ??
+        response.contradictions ??
+        [];
+
+      return {
+        ...response,
+        projectId: response.projectId ?? projectId,
+        contradictions:
+          response.contradictions ?? items,
+        items,
+        total: response.total ?? items.length,
+      };
     },
 
     staleTime: 60_000,

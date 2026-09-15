@@ -1,9 +1,9 @@
 /**
- * Graph domain types.
+ * Canonical graph domain types.
  *
- * These types are intentionally independent from React Flow.
- * The graph API represents domain data, while UI components can
- * transform it into React Flow nodes/edges when necessary.
+ * These types are shared by the API, graph hooks, and graph UI.
+ * React Flow-specific fields are optional so the domain model remains
+ * independent from React Flow while still supporting visualization.
  */
 
 export type GraphNodeType =
@@ -31,17 +31,38 @@ export type GraphEdgeType =
   | "contains"
   | "derived_from"
   | "references"
-  | "unknown";
+  | "unknown"
+  | string;
 
 export interface GraphNode {
   id: string;
   type: GraphNodeType;
   label: string;
 
+  /**
+   * Optional display/source name used by some graph views.
+   */
+  name?: string;
+
   description?: string | null;
 
-  properties?: Record<string, unknown>;
+  /**
+   * Optional graph-layout fields.
+   */
+  position?: {
+    x: number;
+    y: number;
+  };
 
+  x?: number;
+  y?: number;
+  size?: number;
+  connections?: number;
+  relevance?: number;
+
+  selected?: boolean;
+
+  properties?: Record<string, unknown>;
   metadata?: Record<string, unknown>;
 }
 
@@ -51,12 +72,20 @@ export interface GraphEdge {
   source: string;
   target: string;
 
+  /**
+   * Some API responses expose source/target under from/to.
+   */
+  from?: string;
+  to?: string;
+
   type: GraphEdgeType;
 
   label?: string | null;
 
-  properties?: Record<string, unknown>;
+  strength?: number;
+  animated?: boolean;
 
+  properties?: Record<string, unknown>;
   metadata?: Record<string, unknown>;
 }
 
@@ -67,96 +96,54 @@ export interface Graph {
 
 export interface GraphNodeResponse {
   node: GraphNode;
-
   neighbors?: GraphNode[];
-
   edges?: GraphEdge[];
-
   metadata?: Record<string, unknown>;
 }
 
 export interface GraphTraversalResponse {
   root: GraphNode;
-
   nodes: GraphNode[];
-
   edges: GraphEdge[];
-
   depth: number;
-
   metadata?: Record<string, unknown>;
 }
 
-/**
- * Generic graph query.
- */
 export interface GraphQuery {
   query?: string;
-
   node_types?: GraphNodeType[];
-
   edge_types?: GraphEdgeType[];
-
   paper_id?: number;
-
   document_id?: number;
-
   limit?: number;
-
   offset?: number;
 }
 
-/**
- * Request for retrieving a graph around an entity.
- */
 export interface GraphRequest {
   node_id?: string;
-
   node_type?: GraphNodeType;
-
   query?: string;
-
   node_types?: GraphNodeType[];
-
   edge_types?: GraphEdgeType[];
-
   depth?: number;
-
   limit?: number;
 }
 
-/**
- * Request for traversing from a specific node.
- */
 export interface GraphTraversalRequest {
   node_id: string;
-
   depth?: number;
-
   direction?: "outgoing" | "incoming" | "both";
-
   edge_types?: GraphEdgeType[];
-
   node_types?: GraphNodeType[];
-
   limit?: number;
 }
 
-/**
- * Query parameters used by the graph API.
- */
 export interface GraphParams {
   query?: string;
-
   node_type?: GraphNodeType;
-
   node_types?: GraphNodeType[];
-
   edge_types?: GraphEdgeType[];
-
   depth?: number;
-
   limit?: number;
-
   offset?: number;
 }

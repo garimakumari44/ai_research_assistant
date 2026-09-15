@@ -1,0 +1,136 @@
+services:
+
+  # ==========================================================
+  # FRONTEND - NEXT.JS
+  # ==========================================================
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: http://127.0.0.1:8001/api/v1
+
+    container_name: adaptive-rag-frontend
+
+    restart: unless-stopped
+
+    ports:
+      - "3001:3000"
+
+    depends_on:
+      backend:
+        condition: service_started
+
+
+  # ==========================================================
+  # BACKEND - FASTAPI
+  # ==========================================================
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+
+    container_name: adaptive-rag
+
+    restart: unless-stopped
+
+    ports:
+      - "8001:8000"
+
+    env_file:
+      - ./backend/.env
+
+    environment:
+      HOST: 0.0.0.0
+      PORT: 8000
+      DATABASE_URL: postgresql+asyncpg://postgres:Application123@postgres:5432/adaptive_rag
+      REDIS_URL: redis://redis:6379/0
+      CORS_ORIGINS: http://localhost:3000,http://127.0.0.1:3000
+
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+      redis:
+        condition: service_healthy
+
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+
+  # ==========================================================
+  # POSTGRESQL
+  # ==========================================================
+
+  postgres:
+    image: postgres:16
+
+    container_name: adaptive-rag-postgres
+
+    restart: unless-stopped
+
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: Application123
+      POSTGRES_DB: adaptive_rag
+
+    ports:
+      - "5433:5432"
+
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U postgres -d adaptive_rag"
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+
+  # ==========================================================
+  # REDIS
+  # ==========================================================
+
+  redis:
+    image: redis:7
+
+    container_name: adaptive-rag-redis
+
+    restart: unless-stopped
+
+    ports:
+      - "6380:6379"
+
+    volumes:
+      - redis_data:/data
+
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "redis-cli",
+          "ping"
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+
+# ============================================================
+# PERSISTENT VOLUMES
+# ============================================================
+
+volumes:
+
+  postgres_data:
+    name: adaptive-rag-postgres-data
+
+  redis_data:
+    name: adaptive-rag-redis-data
