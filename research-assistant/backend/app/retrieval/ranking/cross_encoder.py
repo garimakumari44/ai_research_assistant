@@ -1,3 +1,4 @@
+
 """
 Cross-Encoder reranker implementation.
 
@@ -24,9 +25,6 @@ from __future__ import annotations
 import logging
 import time
 
-import torch
-from sentence_transformers import CrossEncoder
-
 from app.retrieval.config import retrieval_config
 from app.retrieval.ranking.models import (
     RankedChunk,
@@ -43,15 +41,18 @@ class CrossEncoderReranker:
 
     Scores (query, document) pairs and sorts documents by relevance.
 
-    Contract:
+    The implementation is intentionally lazy:
 
-        query
-            +
-        list[RetrievedChunk]
+        CrossEncoderReranker()
             ↓
-        CrossEncoder
+        no PyTorch import
             ↓
-        RankingResult
+        no SentenceTransformers model
+            ↓
+        lightweight application startup
+
+    The heavy ML stack is loaded only when reranking is actually
+    requested through the `rerank()` method.
     """
 
     def __init__(
@@ -64,25 +65,45 @@ class CrossEncoderReranker:
             or retrieval_config.CROSS_ENCODER_MODEL
         )
 
-        self.device = (
-            device
-            or (
-                "cuda"
-                if torch.cuda.is_available()
-                else "cpu"
-            )
-        )
+        # --------------------------------------------------------------
+        # Device
+        # --------------------------------------------------------------
+        #
+        # IMPORTANT:
+        # Do NOT import torch here.
+        #
+        # Importing torch during application startup can consume a
+        # significant amount of memory even when the CrossEncoder is
+        # never actually used.
+        #
+        # If a device is explicitly supplied, respect it.
+        # Otherwise default to CPU.
+        #
+        # The actual model remains lazy-loaded below.
+        #
 
-        self._model: CrossEncoder | None = None
+        self.device = device or "cpu"
+
+        # --------------------------------------------------------------
+        # Lazy model
+        # --------------------------------------------------------------
+
+        self._model = None
 
     # ==================================================================
     # MODEL
     # ==================================================================
 
     @property
-    def model(self) -> CrossEncoder:
+    def model(self):
         """
-        Lazy-load the CrossEncoder model.
+        Lazy-load the SentenceTransformers CrossEncoder model.
+
+        SentenceTransformers and PyTorch are intentionally imported
+        only when the model is actually requested.
+
+        This keeps the normal API startup and retrieval construction
+        lightweight.
         """
 
         if self._model is None:
@@ -91,6 +112,8 @@ class CrossEncoderReranker:
                 self.model_name,
                 self.device,
             )
+
+            from sentence_transformers import CrossEncoder
 
             self._model = CrossEncoder(
                 self.model_name,
@@ -129,6 +152,10 @@ class CrossEncoderReranker:
             Canonical ranking result containing RankedChunk objects.
         """
 
+        # --------------------------------------------------------------
+        # Validate query
+        # --------------------------------------------------------------
+
         if not isinstance(query, str):
             raise TypeError(
                 "query must be a string."
@@ -141,10 +168,18 @@ class CrossEncoderReranker:
                 "query must not be empty."
             )
 
+        # --------------------------------------------------------------
+        # Normalize chunks
+        # --------------------------------------------------------------
+
         if chunks is None:
             chunks = []
 
         chunks = list(chunks)
+
+        # --------------------------------------------------------------
+        # Empty result
+        # --------------------------------------------------------------
 
         if not chunks:
             return RankingResult(
@@ -155,6 +190,10 @@ class CrossEncoderReranker:
                 reranker=self.model_name,
                 processing_time_ms=0.0,
             )
+
+        # --------------------------------------------------------------
+        # Determine top-k
+        # --------------------------------------------------------------
 
         if top_k is None:
             top_k = retrieval_config.FINAL_TOP_K
@@ -184,6 +223,10 @@ class CrossEncoderReranker:
         # --------------------------------------------------------------
         # CrossEncoder prediction
         # --------------------------------------------------------------
+        #
+        # Accessing self.model here is the first point at which
+        # SentenceTransformers/PyTorch is loaded.
+        #
 
         scores = self.model.predict(
             pairs,
@@ -192,7 +235,7 @@ class CrossEncoderReranker:
         )
 
         # --------------------------------------------------------------
-        # Normalize scores
+        # Convert scores into RankedChunk objects
         # --------------------------------------------------------------
 
         ranked_chunks: list[RankedChunk] = []
@@ -237,6 +280,10 @@ class CrossEncoderReranker:
             :top_k
         ]
 
+        # --------------------------------------------------------------
+        # Timing
+        # --------------------------------------------------------------
+
         elapsed_ms = (
             time.perf_counter() - start
         ) * 1000
@@ -251,6 +298,10 @@ class CrossEncoderReranker:
             self.model_name,
         )
 
+        # --------------------------------------------------------------
+        # Return canonical result
+        # --------------------------------------------------------------
+
         return RankingResult(
             query=query,
             chunks=ranked_chunks,
@@ -264,3 +315,5 @@ class CrossEncoderReranker:
 __all__ = [
     "CrossEncoderReranker",
 ]
+
+

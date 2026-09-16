@@ -4,6 +4,7 @@ from typing import Any
 
 import numpy as np
 
+from app.core.config import settings
 from app.indexing.embeddings.generator import EmbeddingGenerator
 from app.indexing.vector_store.faiss_index import FAISSIndex
 from app.retrieval.interfaces.retriever import Retriever
@@ -26,6 +27,12 @@ class DenseRetriever:
           ↓
         DenseSearchResult
 
+    The embedding model is loaded lazily.
+
+    Creating DenseRetriever() does NOT load the BGE model.
+    BGE is loaded only when search() actually needs to generate
+    a query embedding.
+
     The retriever returns only retrieval candidates.
 
     Document resolution is handled by RetrievalPipeline.
@@ -36,15 +43,32 @@ class DenseRetriever:
         embedder: EmbeddingGenerator | None = None,
         vector_store: FAISSIndex | None = None,
     ) -> None:
+
+        # --------------------------------------------------------------
+        # Create the embedding generator.
+        #
+        # EmbeddingGenerator is now lazy, so this does NOT load BGE.
+        # --------------------------------------------------------------
+
         self.embedder = (
             embedder
             or EmbeddingGenerator()
         )
 
+        # --------------------------------------------------------------
+        # Embedding dimension
+        #
+        # Read the dimension from application configuration instead of
+        # accessing the embedding model. This prevents BGE/Sentence
+        # Transformers from being loaded during DenseRetriever creation.
+        # --------------------------------------------------------------
+
+        dimension = settings.EMBEDDING_DIMENSION
+
         self.vector_store = (
             vector_store
             or FAISSIndex(
-                dimension=self.embedder.dimension
+                dimension=dimension
             )
         )
 
@@ -66,6 +90,8 @@ class DenseRetriever:
         Dense filtering itself is not performed here because FAISS only
         knows vector IDs. Metadata filtering is handled by the higher-level
         RetrievalPipeline after document resolution.
+
+        The BGE model is loaded lazily when embed_query() is called.
         """
 
         del filters
@@ -94,6 +120,8 @@ class DenseRetriever:
 
         # ------------------------------------------------------------------
         # Generate embedding
+        #
+        # THIS is where BGE may be loaded for the first time.
         # ------------------------------------------------------------------
 
         try:
@@ -147,9 +175,14 @@ class DenseRetriever:
 
         # ------------------------------------------------------------------
         # Validate dimension
+        #
+        # Use configuration rather than the embedding model so this check
+        # does not trigger model initialization.
         # ------------------------------------------------------------------
 
-        if vector.size != self.embedder.dimension:
+        expected_dimension = settings.EMBEDDING_DIMENSION
+
+        if vector.size != expected_dimension:
             return []
 
         # ------------------------------------------------------------------

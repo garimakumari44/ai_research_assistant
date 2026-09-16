@@ -138,6 +138,37 @@ class Settings(BaseSettings):
     PROVIDER_MAX_RETRIES: int = 3
 
     # ========================================================================
+    # EMBEDDINGS
+    # ========================================================================
+
+    # Supported values:
+    #   local  -> run BGE locally using sentence-transformers
+    #   remote -> use a remote embedding provider
+    EMBEDDING_PROVIDER: str = "local"
+
+    # Hugging Face Inference Providers endpoint.
+    #
+    # This remains None for local development and is supplied through
+    # environment variables in production.
+    EMBEDDING_API_URL: str | None = None
+
+    # Hugging Face access token.
+    #
+    # NEVER hard-code this value.
+    # Set it through the environment.
+    EMBEDDING_API_KEY: str | None = None
+
+    EMBEDDING_MODEL: str = (
+        "BAAI/bge-small-en-v1.5"
+    )
+
+    # BGE-small produces 384-dimensional embeddings.
+    # This must remain compatible with the existing FAISS index.
+    EMBEDDING_DIMENSION: int = 384
+
+    EMBEDDING_TIMEOUT: int = 60
+
+    # ========================================================================
     # LLM
     # ========================================================================
 

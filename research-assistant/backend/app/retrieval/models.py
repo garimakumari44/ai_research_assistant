@@ -123,7 +123,10 @@ class AdaptiveRAGConfig(BaseModel):
         le=1.0,
     )
 
+    # Reranking remains available globally.
+    # Individual retrieval requests can explicitly enable it.
     enable_reranking: bool = True
+
     enable_query_expansion: bool = True
     enable_multi_query: bool = True
     enable_multi_hop: bool = True
@@ -416,6 +419,13 @@ class RetrievalQuery(BaseModel):
 
     This is the contract between the API/service layer and the
     RetrievalPipeline.
+
+    Reranking is disabled by default because it requires loading the
+    CrossEncoder model and its transformer/PyTorch runtime.
+
+    Workflows that explicitly require reranking can still pass:
+
+        enable_reranking=True
     """
 
     model_config = ConfigDict(
@@ -448,7 +458,10 @@ class RetrievalQuery(BaseModel):
         le=1.0,
     )
 
-    enable_reranking: bool = True
+    # IMPORTANT:
+    # Keep reranking opt-in for lightweight retrieval paths such as
+    # Explore. Explicit research workflows can still enable it.
+    enable_reranking: bool = False
 
     metadata: dict[str, Any] = Field(
         default_factory=dict,
@@ -580,6 +593,8 @@ class RetrievalPlan(BaseModel):
     strategy = overall Adaptive RAG behavior
 
     mode = low-level retrieval engine
+
+    rerank = whether this specific plan requires CrossEncoder reranking.
     """
 
     model_config = ConfigDict(
@@ -618,7 +633,9 @@ class RetrievalPlan(BaseModel):
         le=10,
     )
 
-    rerank: bool = True
+    # IMPORTANT:
+    # Reranking is opt-in at the plan level as well.
+    rerank: bool = False
 
     expand_query: bool = False
 
