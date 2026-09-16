@@ -1,27 +1,47 @@
 # ============================================================
-# Uploaded Documents / Generated Data
+# Python
 # ============================================================
 
-uploads/
-documents/
-data/uploads/
-storage/uploads/
+# Virtual environments
+.venv/
+venv/
+env/
 
-*.pdf
-*.doc
-*.docx
+# Python cache
+__pycache__/
+*.py[cod]
+*.pyo
 
-# Ignore generated/text document data, but keep project configuration files
-*.txt
-!research-assistant/backend/requirements.txt
+# Pytest / coverage
+.pytest_cache/
+.coverage
+coverage.xml
+htmlcov/
 
-# Generated retrieval/index artifacts
-storage/faiss/
-storage/index/
-storage/vectors/
-indexes/
-indices/
+# Type checking / linting
+.mypy_cache/
+.ruff_cache/
 
-*.faiss
-*.npy
-*.npz
+# ============================================================
+# Logs
+# ============================================================
+
+logs/
+*.log
+
+# ============================================================
+# Environment Variables / Secrets
+# ============================================================
+
+.env
+.env.*
+!.env.example
+
+# ============================================================
+# Node / Next.js
+# ============================================================
+
+node_modules/
+.next/
+out/
+dist/
