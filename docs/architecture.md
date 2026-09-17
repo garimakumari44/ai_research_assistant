@@ -570,6 +570,11 @@ The retrieval pipeline combines dense and sparse retrieval.
                       ↓
              Ranked Evidence
 
+
+## System Architecture
+
+![AI Research Assistant System Architecture](img/AI%20Research%20Assistant%20System%20Architecture.png)
+
 Dense Retrieval
 
 Finds semantically similar document chunks using normalized embedding
@@ -1233,3 +1238,5 @@ This allows the system to provide fast exploration, structured research
 workflows, grounded LLM answers, and exportable reports while
 maintaining traceability from generated output back to the underlying
 research sources.
+
+![AI Research Assistant System Architecture](img/archi_2.png)
