@@ -1,264 +1,299 @@
-AI Research Assistant --- Technical Architecture
+# AI Research Assistant — Technical Architecture
 
-Detailed component and data-flow architecture for the AI Research
-Assistant research-intelligence platform.
+> Detailed component and data-flow architecture for the **AI Research Assistant** research-intelligence platform.
 
-1. Architecture Overview
+---
 
-The AI Research Assistant is a layered research-intelligence platform
-that combines:
+## 1. Architecture Overview
 
-A Next.js frontend for exploration, research, reports, and
-knowledge-graph workflows.
+The **AI Research Assistant** is a layered research-intelligence platform that combines:
 
-A FastAPI /api/v1 application layer for authentication and API
-orchestration.
+* A **Next.js frontend** for exploration, research, reports, and knowledge-graph workflows.
+* A **FastAPI `/api/v1` application layer** for authentication and API orchestration.
+* A **Research Intelligence layer** responsible for planning, retrieval, evidence assembly, LLM generation, and report creation.
+* A **Retrieval / AI infrastructure layer** containing dense vector search, sparse keyword search, hybrid retrieval, reranking, and external LLM access.
+* A **PostgreSQL data layer** for persistent application, document, research, and knowledge-graph data.
+* A **FAISS dense retrieval layer** for normalized embedding vectors and similarity search.
 
-A Research Intelligence layer responsible for planning,
-retrieval, evidence assembly, LLM generation, and report creation.
+The architecture separates **persistent relational data** from **vector-search infrastructure**.
 
-A Retrieval / AI infrastructure layer containing dense vector
-search, sparse keyword search, hybrid retrieval, reranking, and
-external LLM access.
+PostgreSQL stores application state, document metadata, research state, chunks, and knowledge-graph data, while FAISS stores and searches normalized embedding vectors.
 
-A PostgreSQL data layer for persistent application, document,
-research, and knowledge-graph data.
+---
 
-The architecture separates persistent relational data from vector-search
-infrastructure. PostgreSQL stores application/document metadata and
-research state, while FAISS stores and searches normalized embedding
-vectors.
+# 2. High-Level Architecture
 
-2. High-Level Architecture
+```mermaid
+flowchart TB
 
-┌─────────────────────────────────────────────────────────────────────┐
-│                         USER / RESEARCHER                           │
-└───────────────────────────────┬─────────────────────────────────────┘
-                                │
-                                ▼
-┌─────────────────────────────────────────────────────────────────────┐
-│                         PRESENTATION                                │
-│                                                                     │
-│  Next.js Frontend                                                  │
-│  ┌────────────┐ ┌──────────────────┐ ┌────────────┐ ┌────────────┐ │
-│  │ Explore UI │ │ Research /       │ │ Reports UI │ │ Knowledge  │ │
-│  │            │ │ Assistant UI     │ │            │ │ Graph UI   │ │
-│  └────────────┘ └──────────────────┘ └────────────┘ └────────────┘ │
-└───────────────────────────────┬─────────────────────────────────────┘
-                                │ HTTPS / API
-                                ▼
-┌─────────────────────────────────────────────────────────────────────┐
-│                         API / APPLICATION                           │
-│                                                                     │
-│                    FastAPI — /api/v1                                │
-│                 Authentication + API Services                       │
-│                                                                     │
-│       ┌─────────┬──────────┬─────────┬────────────────┐             │
-│       │ Explore │ Research │ Reports │ Knowledge Graph│             │
-│       └────┬────┴─────┬────┴────┬────┴───────┬────────┘             │
-└────────────┼──────────┼──────────┼────────────┼─────────────────────┘
-             │          │          │            │
-             ▼          ▼          ▼            ▼
-┌─────────────────────────────────────────────────────────────────────┐
-│                      RESEARCH INTELLIGENCE                          │
-│                                                                     │
-│  Explore Track                  Research Pipeline                   │
-│  ┌────────────────┐             ┌──────────────────────────────┐    │
-│  │ Explore Service│             │ Query Planner                │    │
-│  └───────┬────────┘             └──────────────┬───────────────┘    │
-│          ▼                                     ▼                    │
-│  ┌────────────────┐             ┌──────────────────────────────┐    │
-│  │ Ranked Sources │────────────▶│ Retrieval Adapter            │    │
-│  └───────┬────────┘             └──────────────┬───────────────┘    │
-│          ▼                                     ▼                    │
-│  ┌────────────────┐             ┌──────────────────────────────┐    │
-│  │ Interactive    │             │ Retrieval Pipeline           │    │
-│  │ Exploration    │             │ Dense + BM25 + Filters       │    │
-│  └────────────────┘             └──────────────┬───────────────┘    │
-│                                                ▼                    │
-│                                      Hybrid Retrieval               │
-│                                                ▼                    │
-│                                      Reciprocal Rank Fusion         │
-│                                                ▼                    │
-│                                      Cross-Encoder Reranker         │
-│                                                ▼                    │
-│                                      Evidence Assembly              │
-│                                                ▼                    │
-│                                        LLM Pipeline                 │
-│                                                ▼                    │
-│                                      Research Result                │
-│                                                ▼                    │
-│                                      Research Report                │
-└───────────────────────────┬─────────────────────────────────────────┘
-                            │
-                            ▼
-┌─────────────────────────────────────────────────────────────────────┐
-│                    RETRIEVAL / AI INFRASTRUCTURE                    │
-│                                                                     │
-│  BGE-small Embeddings → Normalized Vectors → FAISS IndexFlatIP     │
-│                                      │                              │
-│                                      ▼                              │
-│                              Shared IndexRegistry                  │
-│                                      │                              │
-│                                      ▼                              │
-│                           Document / Chunk IDs                      │
-│                                                                     │
-│  BM25 / Keyword Index ────────▶ Sparse Retrieval                    │
-│  Cross-Encoder Model ─────────▶ Pairwise Relevance Reranking        │
-│  OpenRouter ──────────────────▶ External LLM Gateway / Provider     │
-└───────────────────────────┬─────────────────────────────────────────┘
-                            │
-                            ▼
-┌─────────────────────────────────────────────────────────────────────┐
-│                              DATA                                   │
-│                                                                     │
-│                           PostgreSQL                                │
-│                                                                     │
-│ Users & Authentication     Papers / Documents                       │
-│ Document Chunks            Metadata                                 │
-│ Research Projects          Research Executions & Results            │
-│ Knowledge Graph Entities   Knowledge Graph Relations                │
-│ Index Metadata                                                        │
-└─────────────────────────────────────────────────────────────────────┘
+    U["User / Researcher"]
 
-3. Architectural Layers
+    subgraph P["Presentation Layer"]
+        UI["Next.js Frontend"]
+        EXP["Explore UI"]
+        RES["Research / Assistant UI"]
+        REP["Reports UI"]
+        KG["Knowledge Graph UI"]
 
-3.1 Presentation Layer
+        UI --> EXP
+        UI --> RES
+        UI --> REP
+        UI --> KG
+    end
 
-The presentation layer is implemented with Next.js and provides the
-researcher-facing application.
+    subgraph API["API / Application Layer"]
+        F["FastAPI /api/v1"]
+        AUTH["Authentication & Authorization"]
+        ES["Explore API"]
+        RS["Research API"]
+        RPS["Reports API"]
+        KGS["Knowledge Graph API"]
 
-Explore UI
+        F --> AUTH
+        F --> ES
+        F --> RS
+        F --> RPS
+        F --> KGS
+    end
 
-The Explore interface supports fast document and knowledge-base
-discovery. It is primarily retrieval-oriented and can operate without an
-LLM for basic browsing and source discovery.
+    subgraph RI["Research Intelligence Layer"]
+        EX["Explore Service"]
+        QP["Query Planner"]
+        RA["Retrieval Adapter"]
+        RP["Retrieval Pipeline"]
+        HR["Hybrid Retrieval"]
+        RRF["Reciprocal Rank Fusion"]
+        CE["Cross-Encoder Reranker"]
+        EA["Evidence Assembly"]
+        LLM["LLM Pipeline"]
+        RR["Research Result"]
+        RG["Research Report"]
+    end
+
+    subgraph INFRA["Retrieval / AI Infrastructure"]
+        EMB["BGE-small Embeddings"]
+        NORM["L2 Normalization"]
+        FAISS["FAISS IndexFlatIP"]
+        IDX["Shared IndexRegistry"]
+        BM25["BM25 / Keyword Index"]
+        LLMGW["OpenRouter / LLM Gateway"]
+    end
+
+    subgraph DATA["Persistent Data Layer"]
+        PG["PostgreSQL"]
+        DOC["Documents / Papers"]
+        CH["Document Chunks"]
+        META["Metadata"]
+        PROJ["Research Projects"]
+        EXEC["Research Executions"]
+        RESULTS["Research Results"]
+        ENT["Knowledge Graph Entities"]
+        REL["Knowledge Graph Relations"]
+    end
+
+    U --> UI
+
+    EXP --> ES
+    RES --> RS
+    REP --> RPS
+    KG --> KGS
+
+    ES --> EX
+    RS --> QP
+    RPS --> RG
+    KGS --> ENT
+
+    EX --> RA
+    QP --> RA
+    RA --> RP
+
+    RP --> HR
+    HR --> RRF
+    RRF --> CE
+    CE --> EA
+    EA --> LLM
+    LLM --> RR
+    RR --> RG
+
+    RP --> EMB
+    EMB --> NORM
+    NORM --> FAISS
+    FAISS --> IDX
+
+    RP --> BM25
+    LLM --> LLMGW
+
+    IDX --> CH
+    CH --> PG
+
+    PG --> DOC
+    PG --> CH
+    PG --> META
+    PG --> PROJ
+    PG --> EXEC
+    PG --> RESULTS
+    PG --> ENT
+    PG --> REL
+
+    RG --> RESULTS
+
+    classDef blue fill:#eaf4ff,stroke:#2563eb,stroke-width:2px,color:#0f172a;
+    classDef darkblue fill:#dbeafe,stroke:#1d4ed8,stroke-width:2px,color:#0f172a;
+    classDef data fill:#eff6ff,stroke:#3b82f6,stroke-width:2px,color:#0f172a;
+
+    class U,UI,EXP,RES,REP,KG,F,AUTH,ES,RS,RPS,KGS blue;
+    class EX,QP,RA,RP,HR,RRF,CE,EA,LLM,RR,RG darkblue;
+    class EMB,NORM,FAISS,IDX,BM25,LLMGW data;
+    class PG,DOC,CH,META,PROJ,EXEC,RESULTS,ENT,REL data;
+```
+
+---
+
+# 3. Architectural Layers
+
+## 3.1 Presentation Layer
+
+The presentation layer is implemented with **Next.js** and provides the researcher-facing application.
+
+### Explore UI
+
+The Explore interface supports fast document and knowledge-base discovery.
+
+It is primarily retrieval-oriented and can operate without an LLM for basic browsing and source discovery.
 
 Typical flow:
 
+```text
 User Query
-   ↓
+    ↓
 Explore API
-   ↓
+    ↓
 Explore Service
-   ↓
+    ↓
 Retrieval
-   ↓
+    ↓
 Ranked Sources
-   ↓
+    ↓
 Interactive Exploration
+```
 
-Research / Assistant UI
+### Research / Assistant UI
 
-The Research / Assistant interface provides the primary research
-workflow.
+The Research / Assistant interface provides the primary research workflow.
 
-It submits a research question to the backend, where the question can be
-planned, decomposed, retrieved against the knowledge base, grounded in
-evidence, and synthesized by the LLM pipeline.
+It submits a research question to the backend, where the question can be planned, decomposed, retrieved against the knowledge base, grounded in evidence, and synthesized by the LLM pipeline.
 
+```text
 Research Question
-       ↓
+        ↓
 Query Planner
-       ↓
+        ↓
 Retrieval Adapter
-       ↓
+        ↓
 Retrieval Pipeline
-       ↓
+        ↓
 Evidence Assembly
-       ↓
+        ↓
 LLM Pipeline
-       ↓
+        ↓
 Research Result
+```
 
-Reports UI
+### Reports UI
 
-The Reports interface presents persisted research outputs as exportable
-research reports.
+The Reports interface presents persisted research outputs as exportable research reports.
 
-Reports are downstream of the research execution and use the assembled
-evidence and generated research result.
+Reports are downstream of research executions and use the assembled evidence and generated research result.
 
-Knowledge Graph UI
+### Knowledge Graph UI
 
-The Knowledge Graph interface exposes relationships between research
-entities such as:
+The Knowledge Graph interface exposes relationships between research entities such as:
 
-Papers
+* Papers
+* Authors
+* Topics
+* Citations
+* Research entities
 
-Authors
+---
 
-Topics
+# 4. API / Application Layer
 
-Citations
+The backend exposes the application through **FastAPI** under:
 
-Research entities
+```text
+/api/v1
+```
 
-4. API / Application Layer
+### Responsibilities
 
-The backend exposes the application through FastAPI under /api/v1.
+* Authentication and authorization
+* Request validation
+* API routing
+* Research orchestration
+* Explore orchestration
+* Report access and generation
+* Knowledge-graph access
+* Persistence coordination
+* Integration with retrieval services
+* Integration with LLM services
 
-Responsibilities
+The application layer remains separate from low-level retrieval implementations.
 
-Authentication and authorization
+API routes should **not directly manage**:
 
-Request validation
+* FAISS
+* BM25
+* RRF
+* Cross-Encoder reranking
+* Embedding models
+* External LLM providers
 
-API routing
+Instead, these capabilities are exposed through application and domain interfaces.
 
-Research orchestration
+---
 
-Explore orchestration
-
-Report access and generation
-
-Knowledge-graph access
-
-Persistence coordination
-
-Integration with retrieval and LLM services
-
-The application layer should remain separate from low-level retrieval
-implementations so that API routes do not directly manage FAISS, BM25,
-reranking, or LLM provider details.
-
-5. Research Intelligence Layer
+# 5. Research Intelligence Layer
 
 The Research Intelligence layer contains the core research workflow.
 
-5.1 Explore Service
+---
+
+## 5.1 Explore Service
 
 The Explore Service provides retrieval-first discovery.
 
-Responsibilities include:
+### Responsibilities
 
-Accepting exploration queries
-
-Executing retrieval
-
-Applying ranking
-
-Returning relevant sources
-
-Supporting interactive source exploration
+* Accept exploration queries
+* Execute retrieval
+* Apply ranking
+* Return relevant sources
+* Support interactive source exploration
 
 The Explore path is intentionally lighter than full research synthesis.
 
+```text
 Explore Request
       ↓
 Explore Service
       ↓
+Retrieval
+      ↓
 Ranked Sources
       ↓
 Interactive Exploration
+```
 
-5.2 Research Pipeline
+---
 
-The Research Pipeline is the main orchestration layer for research
-generation.
+## 5.2 Research Pipeline
+
+The Research Pipeline is the main orchestration layer for research generation.
 
 Conceptually:
 
+```text
 Question
    ↓
 Plan
@@ -274,105 +309,103 @@ Synthesize
 Research Result
    ↓
 Research Report
+```
 
-Its major components are:
+### Major components
 
-Query Planner
+1. Query Planner
+2. Retrieval Adapter
+3. Retrieval Pipeline
+4. Evidence Assembly
+5. LLM Pipeline
+6. Research Result
+7. Research Report
 
-Retrieval Adapter
+---
 
-Retrieval Pipeline
-
-Evidence Assembly
-
-LLM Pipeline
-
-Research Result
-
-Research Report
-
-5.3 Query Planner
+## 5.3 Query Planner
 
 The Query Planner converts a research question into a retrieval plan.
 
 A complex research question may be decomposed into multiple sub-queries.
 
+```text
 Research Question
-       ↓
+        ↓
 Query Analysis
-       ↓
+        ↓
 Sub-query / Retrieval Plan
-       ↓
+        ↓
 Retrieval Adapter
+```
 
-The planner should remain independent of the underlying retrieval
-implementation.
+The planner should remain independent of the underlying retrieval implementation.
 
-5.4 Retrieval Adapter
+This allows retrieval infrastructure to evolve without coupling planning logic to a particular search engine.
 
-The Retrieval Adapter provides a uniform interface between the research
-pipeline and retrieval infrastructure.
+---
 
-This abstraction allows the research pipeline to request evidence
-without depending directly on FAISS, BM25, metadata filters, or
-individual retrieval implementations.
+## 5.4 Retrieval Adapter
+
+The Retrieval Adapter provides a uniform interface between the research pipeline and retrieval infrastructure.
+
+This abstraction allows the research pipeline to request evidence without depending directly on:
+
+* FAISS
+* BM25
+* Metadata filters
+* Specific embedding implementations
+* Individual retrieval strategies
 
 Conceptually:
 
+```text
 Research Pipeline
-       ↓
+        ↓
 Retrieval Adapter
-       ↓
+        ↓
 Retrieval Pipeline
-       ├── Dense Retrieval
-       ├── BM25 / Keyword Retrieval
-       └── Metadata Filtering
+        ├── Dense Retrieval
+        ├── BM25 / Keyword Retrieval
+        └── Metadata Filtering
+```
 
-5.5 Evidence Assembly
+---
 
-Evidence Assembly converts ranked retrieval results into structured
-context for generation.
+## 5.5 Evidence Assembly
 
-Responsibilities include:
+Evidence Assembly converts ranked retrieval results into structured context for generation.
 
-Selecting high-quality evidence
+### Responsibilities
 
-Preserving document/chunk identity
-
-Maintaining source metadata
-
-Constructing grounded context
-
-Preserving citation information
-
-Preparing context for the LLM pipeline
+* Select high-quality evidence
+* Preserve document/chunk identity
+* Maintain source metadata
+* Construct grounded context
+* Preserve citation information
+* Prepare context for the LLM pipeline
 
 The key invariant is:
 
-Generated research should be grounded in retrieved evidence rather
-than relying solely on the model's prior knowledge.
+> Generated research should be grounded in retrieved evidence rather than relying solely on the model's prior knowledge.
 
-5.6 LLM Pipeline
+---
 
-The LLM Pipeline is responsible for grounded generation.
+## 5.6 LLM Pipeline
+
+The LLM Pipeline is responsible for evidence-grounded generation.
 
 It receives:
 
-Research question
-
-Retrieval plan
-
-Retrieved evidence
-
-Source metadata
-
-Relevant citations
+* Research question
+* Retrieval plan
+* Retrieved evidence
+* Source metadata
+* Relevant citations
 
 and produces the research result.
 
-The external model gateway shown in the architecture is OpenRouter,
-which provides access to configured LLM providers/models.
-
+```text
 Evidence
    ↓
 Prompt Construction
@@ -380,55 +413,92 @@ Prompt Construction
 LLM Gateway
    ↓
 Generated Research Result
+```
 
-5.7 Research Result
+The external model gateway is **OpenRouter**, which provides access to configured LLM providers and models.
 
-A Research Result represents the grounded answer produced by the
-research pipeline.
+---
 
-It should retain enough information to connect the generated answer back
-to the evidence used to produce it.
+## 5.7 Research Result
+
+A Research Result represents the grounded answer produced by the research pipeline.
+
+It should retain enough information to connect the generated answer back to the evidence used to produce it.
 
 Typical conceptual fields include:
 
-Research question
+| Field              | Purpose                        |
+| ------------------ | ------------------------------ |
+| Research Question  | Original user question         |
+| Generated Answer   | Grounded research response     |
+| Sources            | Retrieved source references    |
+| Citations          | Evidence provenance            |
+| Execution Metadata | Pipeline execution information |
+| Timestamp          | Creation/update time           |
+| Status             | Execution state                |
 
-Generated answer
+---
 
-Sources
+## 5.8 Research Report
 
-Citations
+A Research Report is the presentation/export layer for a completed research result.
 
-Research execution metadata
-
-Timestamps
-
-Status
-
-5.8 Research Report
-
-A Research Report is the presentation/export layer for a completed
-research result.
-
+```text
 Research Result
       ↓
 Report Generation
       ↓
 Research Report
+```
 
-Reports should preserve evidence provenance and citations so that a
-researcher can inspect the basis of the generated findings.
+Reports should preserve evidence provenance and citations so that researchers can inspect the basis of generated findings.
 
-6. Retrieval / AI Infrastructure
+---
 
-The retrieval subsystem is designed as a multi-stage retrieval
-architecture.
+# 6. Retrieval / AI Infrastructure
 
-6.1 Embedding Model
+The retrieval subsystem uses a multi-stage retrieval architecture.
 
-The architecture uses BGE-small embeddings for document chunks and
-queries.
+```mermaid
+flowchart LR
 
+    Q["Research Query"]
+
+    D["Dense Retrieval"]
+    S["Sparse Retrieval"]
+    M["Metadata Filtering"]
+
+    H["Hybrid Retrieval"]
+    RRF["Reciprocal Rank Fusion"]
+    CE["Cross-Encoder Reranker"]
+    E["Evidence Selection"]
+
+    Q --> D
+    Q --> S
+    Q --> M
+
+    D --> H
+    S --> H
+    M --> H
+
+    H --> RRF
+    RRF --> CE
+    CE --> E
+
+    classDef blue fill:#eaf4ff,stroke:#2563eb,stroke-width:2px,color:#0f172a;
+    classDef darkblue fill:#dbeafe,stroke:#1d4ed8,stroke-width:2px,color:#0f172a;
+
+    class Q,D,S,M blue;
+    class H,RRF,CE,E darkblue;
+```
+
+---
+
+## 6.1 Embedding Model
+
+The architecture uses **BGE-small** embeddings for document chunks and queries.
+
+```text
 Document Chunk
       ↓
 BGE-small Encoder
@@ -436,178 +506,216 @@ BGE-small Encoder
 Embedding Vector
       ↓
 Normalization
+```
 
 Query embeddings are generated using the same embedding space.
 
-6.2 Normalized Vectors
+---
+
+## 6.2 Normalized Vectors
 
 Vectors are normalized before similarity search.
 
-This allows inner-product search to behave as cosine-similarity search
-when vectors are unit normalized.
+This allows inner-product search to behave as cosine-similarity search when vectors are unit normalized.
 
+```text
 Embedding
-   ↓
+    ↓
 L2 Normalization
-   ↓
+    ↓
 Normalized Vector
+```
 
-6.3 FAISS Index
+---
 
-The dense vector store is represented by a FAISS IndexFlatIP
-index.
+## 6.3 FAISS Index
 
+The dense vector store is represented by a:
+
+```text
+FAISS IndexFlatIP
+```
+
+Architecture:
+
+```text
 Normalized Vectors
         ↓
 FAISS IndexFlatIP
         ↓
 Dense Candidate Retrieval
+```
 
-IndexFlatIP performs exact inner-product similarity search over the
-indexed vectors.
+`IndexFlatIP` performs exact inner-product similarity search over indexed vectors.
 
-6.4 Shared IndexRegistry
+When vectors are normalized, the inner product corresponds to cosine similarity.
 
-The Shared IndexRegistry provides the common lifecycle and lookup layer
-for retrieval indexes.
+---
+
+## 6.4 Shared IndexRegistry
+
+The Shared IndexRegistry provides the common lifecycle and lookup layer for retrieval indexes.
 
 It acts as the shared source of truth for:
 
-Dense vector index access
+* Dense vector index access
+* Vector IDs
+* Index metadata
+* Index lifecycle
+* Lookup between vector IDs and document/chunk records
 
-Vector IDs
+The registry prevents separate retrieval paths from accidentally creating independent or inconsistent indexes.
 
-Index metadata
+```mermaid
+flowchart TB
 
-Index lifecycle
+    REG["Shared IndexRegistry"]
 
-Lookup between vector IDs and document/chunk records
+    DENSE["Dense Vector Index"]
+    META["Index Metadata"]
+    IDS["Document / Chunk IDs"]
 
-The registry prevents separate retrieval paths from accidentally
-creating independent or inconsistent indexes.
+    REG --> DENSE
+    REG --> META
+    REG --> IDS
 
-                ┌────────────────────┐
-                │  Shared            │
-                │  IndexRegistry     │
-                └─────────┬──────────┘
-                          │
-             ┌────────────┴────────────┐
-             ▼                         ▼
-      Dense Vector Index        Index Metadata
-             │
-             ▼
-      Document / Chunk IDs
+    classDef blue fill:#eaf4ff,stroke:#2563eb,stroke-width:2px,color:#0f172a;
+    classDef darkblue fill:#dbeafe,stroke:#1d4ed8,stroke-width:2px,color:#0f172a;
 
-6.5 Document / Chunk IDs
+    class REG darkblue;
+    class DENSE,META,IDS blue;
+```
 
-Vector indexes should resolve retrieved vector identifiers back to
-document and chunk records.
+---
 
-The mapping is conceptually:
+## 6.5 Document / Chunk IDs
 
+Vector indexes must resolve retrieved vector identifiers back to document and chunk records.
+
+The mapping is:
+
+```text
 Vector ID
-   ↓
+    ↓
 Document / Chunk ID
-   ↓
+    ↓
 Document Chunk
-   ↓
+    ↓
 Metadata + Source
+```
 
-This mapping is critical for citation generation and evidence
-provenance.
+This mapping is critical for:
 
-6.6 BM25 / Keyword Retrieval
+* Citation generation
+* Evidence provenance
+* Source inspection
+* Research traceability
+
+---
+
+## 6.6 BM25 / Keyword Retrieval
 
 The sparse retrieval path provides lexical matching.
 
+```text
 Query
- ↓
+  ↓
 BM25 / Keyword Index
- ↓
+  ↓
 Sparse Candidate Results
+```
 
-This complements dense retrieval because exact terminology, identifiers,
-names, and domain-specific phrases may not always be captured optimally
-by semantic embeddings.
+Sparse retrieval complements dense retrieval because exact terminology, identifiers, names, and domain-specific phrases may not always be captured optimally by semantic embeddings.
 
-6.7 Metadata Filtering
+---
 
-Metadata filtering restricts retrieval using structured document
-attributes.
+## 6.7 Metadata Filtering
+
+Metadata filtering restricts retrieval using structured document attributes.
 
 Possible filtering dimensions include:
 
-Paper/document identity
+* Paper/document identity
+* Source metadata
+* Topics
+* Authors
+* Document type
+* Other indexed metadata
 
-Source metadata
+Metadata filtering is implemented as part of the retrieval pipeline rather than independently by individual API routes.
 
-Topics
+---
 
-Authors
-
-Other indexed metadata
-
-The metadata filter is applied as part of the retrieval pipeline rather
-than being implemented independently by each API route.
-
-7. Hybrid Retrieval
+# 7. Hybrid Retrieval
 
 The retrieval pipeline combines dense and sparse retrieval.
 
-                    Query
-                      │
-          ┌───────────┴───────────┐
-          ▼                       ▼
-   Dense Retrieval         BM25 / Keyword
-          │                       │
-          └───────────┬───────────┘
-                      ▼
-              Hybrid Retrieval
-                      ↓
-          Reciprocal Rank Fusion
-                      ↓
-            Cross-Encoder Reranker
-                      ↓
-             Ranked Evidence
+```mermaid
+flowchart TB
 
+    Q["Research Query"]
 
-## System Architecture
+    D["Dense Retrieval<br/>BGE-small → FAISS"]
+    S["Sparse Retrieval<br/>BM25 / Keyword"]
+    M["Metadata Filters"]
 
-![AI Research Assistant System Architecture](img/AI%20Research%20Assistant%20System%20Architecture.png)
+    H["Hybrid Candidate Set"]
+    RRF["Reciprocal Rank Fusion"]
+    CE["Cross-Encoder Reranker"]
+    TOPK["Final Top-K Evidence"]
 
-Dense Retrieval
+    Q --> D
+    Q --> S
+    Q --> M
 
-Finds semantically similar document chunks using normalized embedding
-vectors.
+    D --> H
+    S --> H
+    M --> H
 
-Sparse Retrieval
+    H --> RRF
+    RRF --> CE
+    CE --> TOPK
 
-Finds lexical matches using BM25 / keyword search.
+    classDef blue fill:#eaf4ff,stroke:#2563eb,stroke-width:2px,color:#0f172a;
+    classDef darkblue fill:#dbeafe,stroke:#1d4ed8,stroke-width:2px,color:#0f172a;
 
-Hybrid Retrieval
+    class Q,D,S,M blue;
+    class H,RRF,CE,TOPK darkblue;
+```
+
+### Dense Retrieval
+
+Finds semantically similar document chunks using normalized embedding vectors.
+
+### Sparse Retrieval
+
+Finds lexical matches using BM25 or keyword search.
+
+### Hybrid Retrieval
 
 Combines candidate sets from both retrieval strategies.
 
-Reciprocal Rank Fusion
+### Reciprocal Rank Fusion
 
-RRF combines ranked lists into a unified ranking without requiring the
-raw scores from different retrieval systems to be directly comparable.
+RRF combines ranked lists into a unified ranking without requiring raw scores from different retrieval systems to be directly comparable.
 
-Cross-Encoder Reranking
+### Cross-Encoder Reranking
 
-The Cross-Encoder performs pairwise relevance evaluation between a query
-and candidate text.
+The Cross-Encoder performs pairwise relevance evaluation between a query and candidate text.
 
+```text
 Query + Candidate Chunk
           ↓
     Cross-Encoder
           ↓
-   Relevance Score
+    Relevance Score
           ↓
-   Final Top-K Ranking
+    Final Top-K Ranking
+```
 
 This creates a multi-stage retrieval architecture:
 
+```text
 Candidate Generation
         ↓
 Dense + Sparse
@@ -617,22 +725,25 @@ Rank Fusion
 Precision Reranking
         ↓
 Evidence Selection
+```
 
-8. Knowledge Graph Architecture
+---
 
-The Knowledge Graph provides structured relationships between research
-entities.
+# 8. Knowledge Graph Architecture
 
-Core entity types
+The Knowledge Graph provides structured relationships between research entities.
 
-Paper
- ├── Author
- ├── Topic
- ├── Citation
- └── Research Entity
+## Core Entity Types
 
-The graph can represent relationships such as:
+* Paper
+* Author
+* Topic
+* Citation
+* Research Entity
 
+Example relationships:
+
+```text
 Paper → written by → Author
 
 Paper → belongs to → Topic
@@ -640,292 +751,370 @@ Paper → belongs to → Topic
 Paper → cites → Paper
 
 Paper → associated with → Research Entity
+```
 
-Graph data is persisted in PostgreSQL.
+The graph is persisted in PostgreSQL.
 
-The Knowledge Graph UI accesses the graph through the FastAPI
-application layer rather than directly connecting to the database.
+The Knowledge Graph UI accesses graph data through the FastAPI application layer rather than directly connecting to the database.
 
-9. Data Layer
+```mermaid
+flowchart LR
 
-PostgreSQL
+    UI["Knowledge Graph UI"]
+    API["FastAPI /api/v1"]
+    KG["Knowledge Graph Service"]
+    ENT["Graph Entities"]
+    REL["Graph Relations"]
+    PG["PostgreSQL"]
+
+    UI --> API
+    API --> KG
+    KG --> ENT
+    KG --> REL
+    ENT --> PG
+    REL --> PG
+
+    classDef blue fill:#eaf4ff,stroke:#2563eb,stroke-width:2px,color:#0f172a;
+    classDef darkblue fill:#dbeafe,stroke:#1d4ed8,stroke-width:2px,color:#0f172a;
+
+    class UI,API,KG blue;
+    class ENT,REL,PG darkblue;
+```
+
+---
+
+# 9. Data Layer
+
+## PostgreSQL
 
 PostgreSQL is the primary persistent relational data store.
 
-It stores application state and structured research data rather than
-acting as the primary dense vector-search engine in this architecture.
+It stores application state and structured research data rather than acting as the primary dense vector-search engine in this architecture.
 
-The main logical data domains are:
+### Main logical data domains
 
-Domain                              Purpose
+| Domain                        | Purpose                                                   |
+| ----------------------------- | --------------------------------------------------------- |
+| Users & Authentication        | User accounts, credentials, and authentication state      |
+| Papers / Documents            | Research documents and source metadata                    |
+| Document Chunks               | Chunked document content used for retrieval               |
+| Metadata                      | Structured document/source metadata                       |
+| Research Projects             | Persistent research workspace/project state               |
+| Research Executions & Results | Execution state, generated answers, and research outputs  |
+| Knowledge Graph Entities      | Papers, authors, topics, citations, and research entities |
+| Knowledge Graph Relations     | Relationships between graph entities                      |
+| Index Metadata                | Metadata required to maintain retrieval index consistency |
 
-Users & Authentication              User accounts, credentials, and
-authentication state
+---
 
-Papers / Documents                  Research documents and source
-metadata
-
-Document Chunks                     Chunked document content used for
-retrieval
-
-Metadata                            Structured document/source metadata
-
-Research Projects                   Persistent research
-workspace/project state
-
-Research Executions & Results       Execution state, generated answers,
-and research outputs
-
-Knowledge Graph Entities            Papers, authors, topics, citations,
-and research entities
-
-Knowledge Graph Relations           Relationships between graph
-entities
-
-10. Vector Data vs Relational Data
+# 10. Vector Data vs Relational Data
 
 A key architectural separation is:
 
-                 DATA STORAGE
-                      │
-          ┌───────────┴───────────┐
-          ▼                       ▼
-     PostgreSQL                  FAISS
-          │                       │
-          │                       ├── Embedding vectors
-          │                       ├── Vector IDs
-          │                       └── Dense similarity search
-          │
-          ├── Users
-          ├── Documents
-          ├── Chunks
-          ├── Metadata
-          ├── Research Projects
-          ├── Executions / Results
-          └── Knowledge Graph
+```mermaid
+flowchart TB
 
-This separation allows relational persistence and dense retrieval to
-evolve independently.
+    STORAGE["Data Storage"]
 
-11. End-to-End Research Data Flow
+    PG["PostgreSQL"]
+    FAISS["FAISS"]
 
-A complete research request follows this conceptual flow:
+    USERS["Users"]
+    DOCS["Documents"]
+    CHUNKS["Document Chunks"]
+    META["Metadata"]
+    PROJECTS["Research Projects"]
+    EXEC["Executions / Results"]
+    GRAPH["Knowledge Graph"]
 
-1. User
-   │
-   ▼
-2. Research / Assistant UI
-   │
-   ▼
-3. FastAPI /api/v1
-   │
-   ▼
-4. Research Pipeline
-   │
-   ▼
-5. Query Planner
-   │
-   ▼
-6. Retrieval Adapter
-   │
-   ▼
-7. Retrieval Pipeline
-   │
-   ├── Dense Retrieval
-   │      └── BGE-small → FAISS IndexFlatIP
-   │
-   ├── BM25 / Keyword Retrieval
-   │
-   └── Metadata Filtering
-   │
-   ▼
-8. Hybrid Retrieval
-   │
-   ▼
-9. Reciprocal Rank Fusion
-   │
-   ▼
-10. Cross-Encoder Reranking
-    │
-    ▼
-11. Evidence Assembly
-    │
-    ▼
-12. LLM Pipeline
-    │
-    └── OpenRouter / configured model provider
-    │
-    ▼
-13. Research Result
-    │
-    ▼
-14. Research Report
-    │
-    ▼
-15. PostgreSQL persistence
+    VECTORS["Embedding Vectors"]
+    IDS["Vector IDs"]
+    SEARCH["Dense Similarity Search"]
 
-12. Explore Data Flow
+    STORAGE --> PG
+    STORAGE --> FAISS
+
+    PG --> USERS
+    PG --> DOCS
+    PG --> CHUNKS
+    PG --> META
+    PG --> PROJECTS
+    PG --> EXEC
+    PG --> GRAPH
+
+    FAISS --> VECTORS
+    FAISS --> IDS
+    FAISS --> SEARCH
+
+    classDef blue fill:#eaf4ff,stroke:#2563eb,stroke-width:2px,color:#0f172a;
+    classDef darkblue fill:#dbeafe,stroke:#1d4ed8,stroke-width:2px,color:#0f172a;
+
+    class STORAGE blue;
+    class PG,FAISS darkblue;
+    class USERS,DOCS,CHUNKS,META,PROJECTS,EXEC,GRAPH,VECTORS,IDS,SEARCH blue;
+```
+
+This separation allows relational persistence and dense retrieval to evolve independently.
+
+---
+
+# 11. End-to-End Research Data Flow
+
+A complete research request follows this flow:
+
+```mermaid
+flowchart TB
+
+    U["User"]
+    UI["Research / Assistant UI"]
+    API["FastAPI /api/v1"]
+    PIPE["Research Pipeline"]
+    PLAN["Query Planner"]
+    ADAPTER["Retrieval Adapter"]
+    RET["Retrieval Pipeline"]
+
+    DENSE["Dense Retrieval<br/>BGE-small → FAISS"]
+    SPARSE["BM25 / Keyword Retrieval"]
+    FILTER["Metadata Filtering"]
+
+    HYBRID["Hybrid Retrieval"]
+    RRF["Reciprocal Rank Fusion"]
+    RERANK["Cross-Encoder Reranking"]
+    EVIDENCE["Evidence Assembly"]
+    LLM["LLM Pipeline"]
+    OR["OpenRouter / Configured Model"]
+    RESULT["Research Result"]
+    REPORT["Research Report"]
+    DB["PostgreSQL Persistence"]
+
+    U --> UI
+    UI --> API
+    API --> PIPE
+    PIPE --> PLAN
+    PLAN --> ADAPTER
+    ADAPTER --> RET
+
+    RET --> DENSE
+    RET --> SPARSE
+    RET --> FILTER
+
+    DENSE --> HYBRID
+    SPARSE --> HYBRID
+    FILTER --> HYBRID
+
+    HYBRID --> RRF
+    RRF --> RERANK
+    RERANK --> EVIDENCE
+    EVIDENCE --> LLM
+    LLM --> OR
+    OR --> RESULT
+    RESULT --> REPORT
+    RESULT --> DB
+    REPORT --> DB
+
+    classDef blue fill:#eaf4ff,stroke:#2563eb,stroke-width:2px,color:#0f172a;
+    classDef darkblue fill:#dbeafe,stroke:#1d4ed8,stroke-width:2px,color:#0f172a;
+
+    class U,UI,API,PIPE,PLAN,ADAPTER,RET blue;
+    class DENSE,SPARSE,FILTER,HYBRID,RRF,RERANK,EVIDENCE,LLM,OR,RESULT,REPORT,DB darkblue;
+```
+
+---
+
+# 12. Explore Data Flow
 
 Explore is optimized for source discovery rather than full synthesis.
 
-User
- ↓
-Explore UI
- ↓
-FastAPI
- ↓
-Explore Service
- ↓
-Retrieval
- ↓
-Ranked Sources
- ↓
-Interactive Exploration
+```mermaid
+flowchart LR
 
-The Explore path can therefore provide useful retrieval results even
-when an LLM generation step is unnecessary.
+    U["User"]
+    UI["Explore UI"]
+    API["FastAPI"]
+    ES["Explore Service"]
+    RET["Retrieval"]
+    SOURCES["Ranked Sources"]
+    EXP["Interactive Exploration"]
 
-13. Research / Assistant Data Flow
+    U --> UI
+    UI --> API
+    API --> ES
+    ES --> RET
+    RET --> SOURCES
+    SOURCES --> EXP
+
+    classDef blue fill:#eaf4ff,stroke:#2563eb,stroke-width:2px,color:#0f172a;
+    classDef darkblue fill:#dbeafe,stroke:#1d4ed8,stroke-width:2px,color:#0f172a;
+
+    class U,UI,API,ES blue;
+    class RET,SOURCES,EXP darkblue;
+```
+
+The Explore path can therefore provide useful retrieval results even when an LLM generation step is unnecessary.
+
+---
+
+# 13. Research / Assistant Data Flow
 
 The Assistant workflow is more comprehensive:
 
+```text
 User Question
-     ↓
+      ↓
 Research / Assistant UI
-     ↓
+      ↓
 FastAPI
-     ↓
+      ↓
 Research Pipeline
-     ↓
+      ↓
 Query Planner
-     ↓
+      ↓
 Retrieval Adapter
-     ↓
+      ↓
 Retrieval Pipeline
-     ↓
+      ↓
 Dense + BM25 + Metadata Filters
-     ↓
+      ↓
 Hybrid Retrieval
-     ↓
+      ↓
 RRF
-     ↓
+      ↓
 Cross-Encoder Reranking
-     ↓
+      ↓
 Evidence Assembly
-     ↓
+      ↓
 LLM Pipeline
-     ↓
+      ↓
 Grounded Research Result
-     ↓
+      ↓
 Research UI / Reports
+```
 
-14. Report Data Flow
+---
+
+# 14. Report Data Flow
 
 Reports consume completed research outputs.
 
-Research Execution
-       ↓
-Research Result
-       ↓
-Evidence / Citations
-       ↓
-Report Generation
-       ↓
-Research Report
-       ↓
-Reports UI
+```mermaid
+flowchart LR
 
-The report layer should not independently invent research evidence. Its
-source of truth is the completed research result and its associated
-evidence.
+    EXEC["Research Execution"]
+    RESULT["Research Result"]
+    EVIDENCE["Evidence / Citations"]
+    GEN["Report Generation"]
+    REPORT["Research Report"]
+    UI["Reports UI"]
 
-15. Authentication and Security
+    EXEC --> RESULT
+    RESULT --> EVIDENCE
+    EVIDENCE --> GEN
+    GEN --> REPORT
+    REPORT --> UI
+
+    classDef blue fill:#eaf4ff,stroke:#2563eb,stroke-width:2px,color:#0f172a;
+    classDef darkblue fill:#dbeafe,stroke:#1d4ed8,stroke-width:2px,color:#0f172a;
+
+    class EXEC,RESULT,EVIDENCE blue;
+    class GEN,REPORT,UI darkblue;
+```
+
+The report layer should not independently invent research evidence.
+
+Its source of truth is the completed research result and its associated evidence.
+
+---
+
+# 15. Authentication and Security
 
 Authentication sits at the application boundary.
 
-User
- ↓
-Next.js
- ↓
-Authentication API
- ↓
-FastAPI
- ↓
-Authenticated Request
- ↓
-Protected Research / Data APIs
+```mermaid
+flowchart LR
 
-The backend should enforce authorization independently of frontend route
-protection.
+    USER["User"]
+    NEXT["Next.js"]
+    AUTH["Authentication API"]
+    FAST["FastAPI"]
+    PROTECTED["Protected Research / Data APIs"]
 
-Security responsibilities include:
+    USER --> NEXT
+    NEXT --> AUTH
+    AUTH --> FAST
+    FAST --> PROTECTED
 
-Credential validation
+    classDef blue fill:#eaf4ff,stroke:#2563eb,stroke-width:2px,color:#0f172a;
+    classDef darkblue fill:#dbeafe,stroke:#1d4ed8,stroke-width:2px,color:#0f172a;
 
-Token/session validation
+    class USER,NEXT,AUTH blue;
+    class FAST,PROTECTED darkblue;
+```
 
-Protected API endpoints
+The backend must enforce authorization independently of frontend route protection.
 
-User-scoped research projects
+### Security responsibilities
 
-User-scoped research executions/results
+* Credential validation
+* Token/session validation
+* Protected API endpoints
+* User-scoped research projects
+* User-scoped research executions/results
+* Secure handling of external LLM credentials
+* Environment-based configuration
+* No secrets committed to source control
 
-Secure handling of external LLM credentials
+---
 
-Environment-based configuration
+# 16. Component Responsibilities
 
-No secrets committed to source control
+| Component            | Responsibility                                  |
+| -------------------- | ----------------------------------------------- |
+| Next.js Frontend     | User interaction and presentation               |
+| Explore Service      | Retrieval-first exploration                     |
+| Research Pipeline    | End-to-end research orchestration               |
+| Query Planner        | Query analysis and decomposition                |
+| Retrieval Adapter    | Uniform retrieval interface                     |
+| Retrieval Pipeline   | Multi-stage retrieval execution                 |
+| Dense Retrieval      | Semantic candidate generation                   |
+| BM25 / Keyword       | Lexical candidate generation                    |
+| Metadata Filter      | Structured retrieval constraints                |
+| Hybrid Retrieval     | Dense/sparse candidate combination              |
+| RRF                  | Rank-list fusion                                |
+| Cross-Encoder        | Precision reranking                             |
+| Evidence Assembly    | Grounded context construction                   |
+| LLM Pipeline         | Evidence-grounded synthesis                     |
+| OpenRouter           | External LLM gateway/provider access            |
+| Shared IndexRegistry | Shared retrieval index lifecycle/lookup         |
+| PostgreSQL           | Persistent relational application/research data |
+| FAISS                | Dense vector similarity search                  |
+| Knowledge Graph      | Structured research relationships               |
+| Reports              | Presentable/exportable research outputs         |
 
-16. Component Responsibilities
+---
 
-Component              Responsibility
+# 17. Architectural Principles
 
-Next.js Frontend       User interaction and presentation
-Explore Service        Retrieval-first exploration
-Research Pipeline      End-to-end research orchestration
-Query Planner          Query analysis and decomposition
-Retrieval Adapter      Uniform retrieval interface
-Retrieval Pipeline     Multi-stage retrieval execution
-Dense Retrieval        Semantic candidate generation
-BM25 / Keyword         Lexical candidate generation
-Metadata Filter        Structured retrieval constraints
-Hybrid Retrieval       Dense/sparse candidate combination
-RRF                    Rank-list fusion
-Cross-Encoder          Precision reranking
-Evidence Assembly      Grounded context construction
-LLM Pipeline           Evidence-grounded synthesis
-OpenRouter             External LLM gateway/provider access
-Shared IndexRegistry   Shared retrieval index lifecycle/lookup
-PostgreSQL             Persistent relational application/research data
-FAISS                  Dense vector similarity search
-Knowledge Graph        Structured research relationships
-Reports                Exportable/presentable research outputs
+## Separation of Concerns
 
-17. Architectural Principles
+Frontend, API, research orchestration, retrieval, AI inference, and persistence should remain independently testable.
 
-Separation of Concerns
+## Shared Retrieval Infrastructure
 
-Frontend, API, research orchestration, retrieval, AI inference, and
-persistence should remain independently testable.
+All research retrieval paths should use the shared retrieval infrastructure and IndexRegistry rather than creating ad-hoc indexes.
 
-Shared Retrieval Infrastructure
-
-All research retrieval paths should use the shared retrieval
-infrastructure and IndexRegistry rather than creating ad-hoc indexes.
-
-Evidence-First Generation
+## Evidence-First Generation
 
 LLM synthesis should operate on explicitly assembled evidence.
 
-Provenance Preservation
+## Provenance Preservation
 
-Every retrieved chunk should remain traceable to its document/source
-metadata so that generated answers can provide citations.
+Every retrieved chunk should remain traceable to its document/source metadata so that generated answers can provide citations.
 
-Multi-Stage Retrieval
+## Multi-Stage Retrieval
 
 Retrieval should progressively improve precision:
 
+```text
 Broad Candidate Generation
         ↓
 Dense + Sparse
@@ -935,26 +1124,31 @@ Fusion
 Reranking
         ↓
 Evidence Selection
+```
 
-API Boundary
+## API Boundary
 
-Frontend code should communicate through the FastAPI API rather than
-directly accessing PostgreSQL, FAISS, or external model providers.
+Frontend code should communicate through the FastAPI API rather than directly accessing:
 
-Persistent Research State
+* PostgreSQL
+* FAISS
+* External model providers
 
-Research projects, executions, results, and graph entities should remain
-persistent in PostgreSQL so workflows can be revisited and reported
-later.
+## Persistent Research State
 
-18. Reliability and Consistency Requirements
+Research projects, executions, results, and graph entities should remain persistent in PostgreSQL so workflows can be revisited and reported later.
+
+---
+
+# 18. Reliability and Consistency Requirements
 
 The architecture depends on several important invariants.
 
-Retrieval Index Consistency
+## 18.1 Retrieval Index Consistency
 
 Vector IDs must resolve correctly to document/chunk records.
 
+```text
 FAISS Vector ID
       ↓
 IndexRegistry
@@ -962,22 +1156,21 @@ IndexRegistry
 Document / Chunk ID
       ↓
 PostgreSQL Document Chunk
+```
 
-Filter Consistency
+## 18.2 Filter Consistency
 
-Document and paper filters must use the identifier type expected by the
-underlying retrieval and persistence layers.
+Document and paper filters must use the identifier type expected by the underlying retrieval and persistence layers.
 
-Shared Pipeline Consistency
+## 18.3 Shared Pipeline Consistency
 
-Explore and Research should not silently maintain separate retrieval
-indexes when they are intended to operate over the same knowledge base.
+Explore and Research should not silently maintain separate retrieval indexes when they are intended to operate over the same knowledge base.
 
-Citation Consistency
+## 18.4 Citation Consistency
 
-Evidence selected for generation must retain its source identity
-through:
+Evidence selected for generation must retain its source identity through the complete pipeline:
 
+```text
 Retrieval
    ↓
 Reranking
@@ -989,36 +1182,55 @@ LLM Prompt
 Research Result
    ↓
 Report
+```
 
-19. Deployment View
+---
+
+# 19. Deployment View
 
 The logical production deployment can be represented as:
 
-                         Internet
-                            │
-             ┌──────────────┴──────────────┐
-             ▼                             ▼
-      Next.js Frontend              FastAPI Backend
-             │                             │
-             │ HTTPS                       │
-             └─────────────────────────────┘
-                                           │
-                          ┌────────────────┼────────────────┐
-                          ▼                ▼                ▼
-                     PostgreSQL       FAISS / Index     OpenRouter
-                     Persistent       Retrieval         External LLM
-                     Data             Infrastructure    Gateway
+```mermaid
+flowchart TB
 
-The frontend should contain only public configuration required for API
-communication. Secrets and provider credentials belong on the backend.
+    INTERNET["Internet"]
 
-20. Observability
+    FRONT["Next.js Frontend"]
+    BACK["FastAPI Backend"]
 
-The research pipeline should expose enough structured information to
-diagnose failures across stages.
+    PG["PostgreSQL<br/>Persistent Data"]
+    FAISS["FAISS / Index<br/>Retrieval Infrastructure"]
+    OR["OpenRouter<br/>External LLM Gateway"]
+
+    INTERNET --> FRONT
+    INTERNET --> BACK
+
+    FRONT -->|"HTTPS / API"| BACK
+
+    BACK --> PG
+    BACK --> FAISS
+    BACK --> OR
+
+    classDef blue fill:#eaf4ff,stroke:#2563eb,stroke-width:2px,color:#0f172a;
+    classDef darkblue fill:#dbeafe,stroke:#1d4ed8,stroke-width:2px,color:#0f172a;
+
+    class INTERNET,FRONT,BACK blue;
+    class PG,FAISS,OR darkblue;
+```
+
+The frontend should contain only public configuration required for API communication.
+
+Secrets and provider credentials belong on the backend.
+
+---
+
+# 20. Observability
+
+The research pipeline should expose enough structured information to diagnose failures across stages.
 
 Recommended execution-level observability:
 
+```text
 Request
   ↓
 Authentication
@@ -1036,56 +1248,44 @@ Evidence Assembly
 LLM
   ↓
 Persistence
+```
 
 Each stage should ideally record:
 
-Execution status
+* Execution status
+* Duration
+* Error information
+* Input/output counts
+* Retrieved source counts
+* Reranked source counts
+* LLM invocation status
+* Persistence status
 
-Duration
+This makes it possible to distinguish retrieval failures from LLM, authentication, API, or persistence failures.
 
-Error information
+---
 
-Input/output counts
+# 21. Testing Strategy
 
-Retrieved source counts
-
-Reranked source counts
-
-LLM invocation status
-
-Persistence status
-
-This makes it possible to distinguish retrieval failures from LLM,
-authentication, API, or persistence failures.
-
-21. Testing Strategy
-
-Unit Tests
+## Unit Tests
 
 Test individual components:
 
-Query Planner
+* Query Planner
+* Retrieval Adapter
+* Dense Retrieval
+* BM25 retrieval
+* Metadata filtering
+* RRF
+* Cross-Encoder reranking
+* Evidence Assembly
+* LLM prompt construction
 
-Retrieval Adapter
-
-Dense Retrieval
-
-BM25 retrieval
-
-Metadata filtering
-
-RRF
-
-Cross-Encoder reranking
-
-Evidence Assembly
-
-LLM prompt construction
-
-Integration Tests
+## Integration Tests
 
 Test:
 
+```text
 API
  ↓
 Research Pipeline
@@ -1093,150 +1293,251 @@ Research Pipeline
 Retrieval Infrastructure
  ↓
 PostgreSQL
+```
 
-End-to-End Tests
+## End-to-End Tests
 
 Test complete researcher workflows:
 
+```text
 Register / Login
       ↓
 Explore
       ↓
-Select / inspect sources
+Select / Inspect Sources
       ↓
-Ask research question
+Ask Research Question
       ↓
-Generate grounded result
+Generate Grounded Result
       ↓
-Open report
+Open Report
+```
 
-Retrieval Validation
+## Retrieval Validation
 
 Use known documents and questions to verify:
 
-Relevant documents are retrieved.
+* Relevant documents are retrieved.
+* Filters are respected.
+* Vector IDs resolve correctly.
+* Hybrid retrieval combines candidate sets correctly.
+* Reranking changes ordering appropriately when relevance differs.
+* Citations map back to the correct source chunks.
 
-Filters are respected.
+---
 
-Vector IDs resolve correctly.
+# 22. Scalability Considerations
 
-Hybrid retrieval combines candidate sets correctly.
-
-Reranking changes ordering appropriately when relevance differs.
-
-Citations map back to the correct source chunks.
-
-22. Scalability Considerations
-
-The architecture can scale by separating workloads:
-
-API Scaling
+## API Scaling
 
 Run multiple FastAPI instances behind a load balancer.
 
-Frontend Scaling
+## Frontend Scaling
 
 Deploy the Next.js application independently from the backend.
 
-Retrieval Scaling
+## Retrieval Scaling
 
-The retrieval layer can evolve from a local FAISS deployment toward a
-dedicated vector-search service if dataset size or concurrency requires
-it.
+The retrieval layer can evolve from a local FAISS deployment toward a dedicated vector-search service if dataset size or concurrency requires it.
 
-LLM Scaling
+## LLM Scaling
 
-OpenRouter provides an abstraction over external model providers,
-allowing the configured model/provider to change without redesigning the
-research pipeline.
+OpenRouter provides an abstraction over external model providers, allowing the configured model/provider to change without redesigning the research pipeline.
 
-Database Scaling
+## Database Scaling
 
-PostgreSQL can be scaled independently for persistent application and
-research state.
+PostgreSQL can be scaled independently for persistent application and research state.
 
-23. Failure Boundaries
+---
+
+# 23. Failure Boundaries
 
 The architecture intentionally creates clear failure boundaries.
 
-Authentication Failure
+## Authentication Failure
 
 Stops the request before protected research operations.
 
-Retrieval Failure
+## Retrieval Failure
 
-Prevents or degrades evidence generation while keeping the API available
-for unrelated functionality.
+Prevents or degrades evidence generation while keeping the API available for unrelated functionality.
 
-Reranking Failure
+## Reranking Failure
 
-Can be handled as a retrieval-stage failure or degraded mode depending
-on application policy.
+Can be handled as a retrieval-stage failure or degraded mode depending on application policy.
 
-LLM Failure
+## LLM Failure
 
-Should not erase successfully retrieved evidence. The research execution
-should retain enough state to diagnose or retry generation.
+Should not erase successfully retrieved evidence.
 
-Persistence Failure
+The research execution should retain enough state to diagnose or retry generation.
 
-Should be reported independently from successful retrieval/generation so
-that transient database issues do not obscure the underlying research
-execution.
+## Persistence Failure
 
-24. Architecture Summary
+Should be reported independently from successful retrieval/generation so that transient database issues do not obscure the underlying research execution.
 
-The AI Research Assistant follows a layered, evidence-grounded
-architecture:
+---
 
-                 USER
-                   │
-                   ▼
-             Next.js UI
-                   │
-                   ▼
-            FastAPI /api/v1
-                   │
-        ┌──────────┴──────────┐
-        ▼                     ▼
-   Explore Service      Research Pipeline
-                              │
-                         Query Planner
-                              │
-                       Retrieval Adapter
-                              │
-                ┌─────────────┼─────────────┐
-                ▼             ▼             ▼
-             Dense          BM25       Metadata
-             Search        Search        Filter
-                │             │             │
-                └─────────────┼─────────────┘
-                              ▼
-                      Hybrid Retrieval
-                              ▼
-                           RRF
-                              ▼
-                    Cross-Encoder
-                       Reranking
-                              ▼
-                     Evidence Assembly
-                              ▼
-                        LLM Pipeline
-                              │
-                         OpenRouter
-                              ▼
-                     Research Result
-                              ▼
-                     Research Report
-                              │
-                              ▼
-                         PostgreSQL
+# 24. Architecture Summary
 
-The central design goal is to keep retrieval, evidence, generation,
-provenance, and persistence connected through explicit interfaces.
-This allows the system to provide fast exploration, structured research
-workflows, grounded LLM answers, and exportable reports while
-maintaining traceability from generated output back to the underlying
-research sources.
+The AI Research Assistant follows a layered, evidence-grounded architecture:
 
+```mermaid
+flowchart TB
+
+    USER["USER"]
+    UI["Next.js UI"]
+    API["FastAPI /api/v1"]
+
+    subgraph INT["Research Intelligence"]
+        EXP["Explore Service"]
+        RP["Research Pipeline"]
+        QP["Query Planner"]
+        RA["Retrieval Adapter"]
+
+        DENSE["Dense Search"]
+        SPARSE["BM25 Search"]
+        FILTER["Metadata Filter"]
+
+        HYBRID["Hybrid Retrieval"]
+        RRF["RRF"]
+        CE["Cross-Encoder Reranking"]
+        EA["Evidence Assembly"]
+        LLM["LLM Pipeline"]
+        RESULT["Research Result"]
+        REPORT["Research Report"]
+    end
+
+    subgraph AI["Retrieval / AI Infrastructure"]
+        BGE["BGE-small"]
+        FI["FAISS IndexFlatIP"]
+        IDX["Shared IndexRegistry"]
+        OR["OpenRouter"]
+    end
+
+    PG["PostgreSQL"]
+
+    USER --> UI
+    UI --> API
+
+    API --> EXP
+    API --> RP
+
+    RP --> QP
+    QP --> RA
+
+    RA --> DENSE
+    RA --> SPARSE
+    RA --> FILTER
+
+    DENSE --> HYBRID
+    SPARSE --> HYBRID
+    FILTER --> HYBRID
+
+    HYBRID --> RRF
+    RRF --> CE
+    CE --> EA
+    EA --> LLM
+
+    DENSE --> BGE
+    BGE --> FI
+    FI --> IDX
+
+    LLM --> OR
+    LLM --> RESULT
+    RESULT --> REPORT
+    RESULT --> PG
+    REPORT --> PG
+    IDX --> PG
+
+    classDef blue fill:#eaf4ff,stroke:#2563eb,stroke-width:2px,color:#0f172a;
+    classDef darkblue fill:#dbeafe,stroke:#1d4ed8,stroke-width:2px,color:#0f172a;
+    classDef data fill:#eff6ff,stroke:#3b82f6,stroke-width:2px,color:#0f172a;
+
+    class USER,UI,API,EXP,RP,QP,RA blue;
+    class DENSE,SPARSE,FILTER,HYBRID,RRF,CE,EA,LLM,RESULT,REPORT darkblue;
+    class BGE,FI,IDX,OR,PG data;
+```
+
+The central design goal is to keep **retrieval, evidence, generation, provenance, and persistence** connected through explicit interfaces.
+
+This allows the system to provide:
+
+* Fast exploration
+* Structured research workflows
+* Hybrid retrieval
+* Evidence-grounded LLM answers
+* Citation-aware research results
+* Persistent research state
+* Exportable research reports
+* Knowledge-graph exploration
+* Clear operational and failure boundaries
+
+while maintaining traceability from generated output back to the underlying research sources.
+
+---
+
+## Architecture Principles at a Glance
+
+```text
+                    RESEARCH QUESTION
+                           │
+                           ▼
+                    ┌──────────────┐
+                    │ Query Planner│
+                    └──────┬───────┘
+                           │
+                           ▼
+                  ┌─────────────────┐
+                  │ RetrievalAdapter│
+                  └────────┬────────┘
+                           │
+              ┌────────────┼────────────┐
+              ▼            ▼            ▼
+           Dense         BM25       Metadata
+           Search        Search       Filter
+              │            │            │
+              └────────────┼────────────┘
+                           ▼
+                  Hybrid Retrieval
+                           │
+                           ▼
+                         RRF
+                           │
+                           ▼
+                  Cross-Encoder
+                    Reranking
+                           │
+                           ▼
+                  Evidence Assembly
+                           │
+                           ▼
+                    LLM Pipeline
+                           │
+                           ▼
+                  Research Result
+                           │
+                           ▼
+                  Research Report
+                           │
+                           ▼
+                      PostgreSQL
+```
+
+### Core invariants
+
+```text
+Shared Retrieval Infrastructure
+            +
+Evidence-First Generation
+            +
+Provenance Preservation
+            +
+Persistent Research State
+            +
+Explicit API Boundaries
+            =
+Traceable Research Intelligence
+```
+![AI Research Assistant System Architecture](img/AI%20Research%20Assistant%20System%20Architecture.png)
 ![AI Research Assistant System Architecture](img/archi_2.png)
