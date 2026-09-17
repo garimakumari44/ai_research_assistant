@@ -95,7 +95,7 @@ async def chat(
 
         # Keep the API independent from the exact internal method name
         # until the AssistantService contract is finalized.
-        result = await assistant_service.handle(payload)
+        result = await assistant_service.respond(payload)
 
         logger.info(
             "Assistant request completed | request_id=%s",

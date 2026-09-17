@@ -1,3 +1,4 @@
+
 """
 Assistant orchestration.
 
@@ -42,12 +43,18 @@ from app.assistant.models import (
     AssistantRequest,
     AssistantResponse,
     AssistantSource,
+    ChatMessage,
     LLMResponse,
 )
 from app.assistant.prompts import AssistantPromptBuilder
 from app.assistant.response import ResponseBuilder
 
 from app.llm.factory import get_llm_provider
+from app.llm.models import (
+    ChatMessage as LLMChatMessage,
+    LLMRequest,
+    MessageRole,
+)
 from app.research.models import ResearchQuery
 from app.research.pipeline import ResearchPipeline
 
@@ -421,7 +428,7 @@ class AssistantOrchestrator:
             )
 
             if (
-                role == "user"
+                str(role) == "user"
                 and content == context.query
             ):
                 continue
@@ -429,9 +436,6 @@ class AssistantOrchestrator:
             filtered_messages.append(
                 message
             )
-
-        # Use ChatMessage if available.
-        from app.assistant.models import ChatMessage
 
         filtered_messages.append(
             ChatMessage(
@@ -465,6 +469,36 @@ class AssistantOrchestrator:
 
         provider = self.llm_provider
 
+        # --------------------------------------------------------------------
+        # IMPORTANT:
+        #
+        # Assistant has its own ChatMessage model while the LLM layer has a
+        # separate ChatMessage model. OpenRouter's LLMRequest expects the
+        # LLM-layer ChatMessage instances.
+        #
+        # Convert at this boundary rather than coupling the two layers.
+        # --------------------------------------------------------------------
+
+        llm_messages = [
+            LLMChatMessage(
+                role=MessageRole(
+                    str(message.role)
+                ),
+                content=str(
+                    message.content
+                ),
+                metadata=(
+                    getattr(
+                        message,
+                        "metadata",
+                        {},
+                    )
+                    or {}
+                ),
+            )
+            for message in messages
+        ]
+
         if hasattr(provider, "chat"):
             method = provider.chat
 
@@ -493,31 +527,35 @@ class AssistantOrchestrator:
 
             if "messages" in parameters:
                 result = method(
-                    messages=messages
+                    messages=llm_messages
                 )
 
             elif "prompt" in parameters:
                 result = method(
                     prompt=self._messages_to_prompt(
-                        messages
+                        llm_messages
                     )
                 )
 
             elif "input" in parameters:
                 result = method(
                     input=self._messages_to_prompt(
-                        messages
+                        llm_messages
                     )
                 )
 
             else:
                 result = method(
-                    messages
+                    LLMRequest(
+                        messages=llm_messages
+                    )
                 )
 
         except (ValueError, TypeError):
             result = method(
-                messages
+                LLMRequest(
+                    messages=llm_messages
+                )
             )
 
         return await self._resolve_awaitable(
@@ -1035,3 +1073,4 @@ __all__ = [
     "AssistantOrchestrator",
     "get_assistant_orchestrator",
 ]
+

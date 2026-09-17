@@ -7,6 +7,7 @@ import re
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional, Sequence, Set
 
+from app.core.config import settings
 from app.db.session import AsyncSessionLocal
 from app.llm.pipeline import LLMPipeline, get_llm_pipeline
 from app.retrieval.service import RetrievalService
@@ -84,6 +85,29 @@ class ResearchPipeline:
     the result is rejected and is NOT sent to the LLM.
 
     This is critical for research grounding.
+
+    RERANKING:
+
+    CrossEncoder reranking is optional and environment-controlled.
+
+    The application may run with:
+
+        ENABLE_CROSS_ENCODER_RERANKING=false
+
+    on constrained infrastructure such as a 512 MB Render instance.
+
+    In that mode the research pipeline still performs:
+
+        Dense retrieval
+        BM25 retrieval
+        Hybrid/RRF ranking
+        Research-specific relevance filtering
+        Paper retrieval
+        GitHub retrieval
+        LLM synthesis
+
+    The CrossEncoder remains available and can be enabled explicitly in an
+    environment with sufficient memory.
     """
 
     # ------------------------------------------------------------------------
@@ -167,7 +191,6 @@ class ResearchPipeline:
         "explain",
         "describe",
         "discuss",
-        "information",
         "something",
         "anything",
     }
@@ -200,12 +223,24 @@ class ResearchPipeline:
 
         self.execution_engine = execution_engine
 
+        self.enable_reranking = bool(
+            getattr(
+                settings,
+                "ENABLE_CROSS_ENCODER_RERANKING",
+                False,
+            )
+        )
+
         logger.info(
             "ResearchPipeline initialized: "
-            "retrieval_service=%s llm_pipeline=%s execution_engine=%s",
+            "retrieval_service=%s "
+            "llm_pipeline=%s "
+            "execution_engine=%s "
+            "cross_encoder_reranking=%s",
             self.retrieval_service is not None,
             self.llm_pipeline is not None,
             self.execution_engine is not None,
+            self.enable_reranking,
         )
 
     # ========================================================================
@@ -490,18 +525,13 @@ class ResearchPipeline:
 
         # Always retrieve a larger candidate pool.
         #
-        # Previously:
+        # Candidate pool -> document filtering -> relevance filtering
+        # -> final top_k.
         #
-        #     no scope -> top_k
-        #
-        # This was dangerous because unrelated nearest neighbours could
-        # immediately become final evidence.
-        #
-        # Now:
-        #
-        #     candidate pool -> document filtering -> relevance filtering
-        #     -> final top_k
-        #
+        # This remains useful even when CrossEncoder reranking is disabled,
+        # because the research-specific lexical relevance gate provides an
+        # additional grounding layer.
+
         candidate_top_k = min(
             max(top_k * 5, self.MIN_CANDIDATE_POOL),
             self.MAX_CANDIDATE_POOL,
@@ -509,20 +539,15 @@ class ResearchPipeline:
 
         logger.info(
             "Retrieving knowledge-base candidates: "
-            "question=%r top_k=%s candidate_top_k=%s depth=%s scoped=%s",
+            "question=%r top_k=%s candidate_top_k=%s depth=%s scoped=%s "
+            "cross_encoder_reranking=%s",
             query.question,
             top_k,
             candidate_top_k,
             depth,
             bool(allowed_document_ids),
+            self.enable_reranking,
         )
-
-        # --------------------------------------------------------------------
-        # Explicitly request reranking.
-        #
-        # The generic retrieval pipeline should remain generic. Research,
-        # however, needs its ranking signal available for evidence evaluation.
-        # --------------------------------------------------------------------
 
         result = await self._retrieve_with_reranking(
             query=query.question,
@@ -596,6 +621,17 @@ class ResearchPipeline:
         """
         Call RetrievalService while remaining compatible with versions of the
         service that expose slightly different signatures.
+
+        CrossEncoder reranking is controlled by:
+
+            settings.ENABLE_CROSS_ENCODER_RERANKING
+
+        On memory-constrained infrastructure this should be false.
+
+        This means the retrieval pipeline still performs its normal hybrid
+        retrieval, while avoiding loading the CrossEncoder/PyTorch model.
+
+        Explicit reranking can still be enabled in a larger environment.
         """
 
         if self.retrieval_service is None:
@@ -603,13 +639,36 @@ class ResearchPipeline:
 
         retrieve_method = self.retrieval_service.retrieve
 
-        # First try the canonical modern signature.
+        enable_reranking = self.enable_reranking
+
+        logger.info(
+            "Research retrieval request: "
+            "top_k=%d mode=hybrid enable_reranking=%s",
+            top_k,
+            enable_reranking,
+        )
+
+        # --------------------------------------------------------------------
+        # Canonical modern signature.
+        #
+        # IMPORTANT:
+        #
+        # Do NOT hard-code True here.
+        #
+        # Previously this was:
+        #
+        #     enable_reranking=True
+        #
+        # which forced the BAAI/bge-reranker-base CrossEncoder onto Render
+        # even when the deployment was supposed to be memory-safe.
+        # --------------------------------------------------------------------
+
         try:
             return await self._resolve_awaitable(
                 retrieve_method(
                     query,
                     top_k=top_k,
-                    enable_reranking=True,
+                    enable_reranking=enable_reranking,
                     mode="hybrid",
                 )
             )
@@ -621,13 +680,16 @@ class ResearchPipeline:
                 exc_info=True,
             )
 
+        # --------------------------------------------------------------------
         # Second compatibility path.
+        # --------------------------------------------------------------------
+
         try:
             return await self._resolve_awaitable(
                 retrieve_method(
                     query,
                     top_k=top_k,
-                    enable_reranking=True,
+                    enable_reranking=enable_reranking,
                 )
             )
 
@@ -638,7 +700,13 @@ class ResearchPipeline:
                 exc_info=True,
             )
 
+        # --------------------------------------------------------------------
         # Final compatibility path.
+        #
+        # This is intentionally only reached for older RetrievalService
+        # implementations that do not accept the reranking argument.
+        # --------------------------------------------------------------------
+
         return await self._resolve_awaitable(
             retrieve_method(
                 query,
@@ -657,8 +725,6 @@ class ResearchPipeline:
 
         This is deliberately stricter than generic retrieval.
 
-        Why?
-
         A generic vector search always returns its nearest neighbours, even
         when the query is outside the indexed corpus.
 
@@ -672,9 +738,11 @@ class ResearchPipeline:
             - metadata
             - paper metadata
 
-        A reranker score is used as a supporting signal, but it is NOT used as
-        the only gate because different reranker implementations may expose
-        different score scales.
+        A reranker score is used as a supporting signal when available, but
+        it is NOT required.
+
+        This means research grounding continues to work when the CrossEncoder
+        is disabled for memory-constrained deployments.
 
         Example:
 
@@ -696,8 +764,6 @@ class ResearchPipeline:
             query
         )
 
-        # If the question contains no meaningful tokens, do not accidentally
-        # reject all evidence. This is primarily a defensive fallback.
         if not query_tokens:
             logger.warning(
                 "Research relevance gate found no meaningful query tokens "
@@ -722,7 +788,6 @@ class ResearchPipeline:
 
             metadata["research_relevance_score"] = relevance
 
-            # Preserve this score for downstream evidence construction.
             self._attach_metadata(
                 item,
                 {
@@ -763,19 +828,6 @@ class ResearchPipeline:
         cls,
         query: str,
     ) -> Set[str]:
-        """
-        Extract meaningful research-topic tokens.
-
-        Conversational framing is removed while technical terms are retained.
-
-        Example:
-
-            "what you know about BERT"
-
-        becomes:
-
-            {"bert"}
-        """
 
         raw_tokens = cls.QUERY_TOKEN_PATTERN.findall(
             str(query).lower()
@@ -794,8 +846,6 @@ class ResearchPipeline:
             if normalized in cls.QUERY_STOP_WORDS:
                 continue
 
-            # Ignore extremely short ordinary fragments, but preserve
-            # meaningful technical tokens such as "ai", "ml", "rl".
             if len(normalized) < 2:
                 continue
 
@@ -810,31 +860,14 @@ class ResearchPipeline:
         query_tokens: Set[str],
         item: Any,
     ) -> float:
-        """
-        Calculate a conservative research relevance score in [0, 1].
-
-        The most important signal is meaningful topic-token coverage.
-
-        A source is considered relevant when at least one meaningful research
-        token is present in the actual source/title/metadata.
-
-        This is intentionally conservative:
-
-            "BERT" does not match "Transformer" merely because BERT is
-            semantically related.
-
-        That behaviour is desirable for an evidence gate when the current
-        knowledge base does not contain BERT evidence.
-
-        The retrieval/reranker score is used to strengthen relevance after an
-        anchor match, not to manufacture relevance when no anchor exists.
-        """
 
         content = self._item_content(item)
+
         title = self._item_title(
             item,
             fallback="",
         )
+
         metadata = self._item_metadata(item)
 
         metadata_text_parts: List[str] = []
@@ -893,7 +926,6 @@ class ResearchPipeline:
             / max(1, len(query_tokens))
         )
 
-        # Exact phrase matching is a strong additional signal.
         normalized_query = self._normalize_text(
             query
         )
@@ -909,7 +941,6 @@ class ResearchPipeline:
             else 0.0
         )
 
-        # Retrieve the actual reranker/retrieval score when available.
         rerank_score = self._extract_score(
             item,
             "rerank_score",
@@ -921,9 +952,6 @@ class ResearchPipeline:
                 "score",
             )
 
-        # We deliberately do not assume that every reranker uses the same
-        # numerical scale. Only use a finite score when it already appears
-        # to be normalized to [0, 1].
         normalized_rank_score = None
 
         if rerank_score is not None:
@@ -933,15 +961,11 @@ class ResearchPipeline:
         if normalized_rank_score is None:
             normalized_rank_score = 0.0
 
-        # Base relevance comes from actual topical overlap.
-        #
-        # Coverage dominates because this is an evidence gate.
         relevance = 0.75 * coverage
 
         if phrase_match:
             relevance += 0.15
 
-        # Reranking is only supporting evidence.
         relevance += 0.10 * normalized_rank_score
 
         return self._clamp(
@@ -955,16 +979,6 @@ class ResearchPipeline:
         token: str,
         text: str,
     ) -> bool:
-        """
-        Match a token as a meaningful token rather than a raw substring.
-
-        This prevents:
-
-            "bert"
-
-        from matching an unrelated word merely because "bert" occurs inside
-        another string.
-        """
 
         escaped = re.escape(
             token.lower()
@@ -981,6 +995,7 @@ class ResearchPipeline:
     def _normalize_text(
         value: Any,
     ) -> str:
+
         text = str(
             value or ""
         ).lower()
@@ -998,14 +1013,6 @@ class ResearchPipeline:
         item: Any,
         field: str,
     ) -> Optional[float]:
-        """
-        Extract a score from:
-
-            result.field
-            result.metadata[field]
-            result.document.metadata[field]
-            dictionary[field]
-        """
 
         if item is None:
             return None
@@ -1121,13 +1128,6 @@ class ResearchPipeline:
         item: Any,
         values: Dict[str, Any],
     ) -> None:
-        """
-        Best-effort metadata propagation.
-
-        This allows later source/evidence construction to access the
-        research-specific relevance score regardless of whether the retrieval
-        result is a dict or a Pydantic/object result.
-        """
 
         if item is None:
             return
@@ -1160,9 +1160,6 @@ class ResearchPipeline:
             metadata.update(values)
             return
 
-        # Pydantic models may reject direct attribute assignment. In that
-        # situation the downstream _item_metadata() still extracts fields
-        # directly from the result object.
         try:
             setattr(
                 item,
@@ -1532,6 +1529,7 @@ class ResearchPipeline:
                 "retrieved_source_count": self._count_sources(
                     retrieval_context
                 ),
+                "cross_encoder_reranking": self.enable_reranking,
             },
         }
 
@@ -2027,8 +2025,6 @@ class ResearchPipeline:
             ):
                 metadata[key] = data[key]
 
-        # Pydantic/object retrieval results often expose these scores as
-        # attributes even when model_dump() does not place them in metadata.
         for key in (
             "score",
             "rerank_score",
@@ -2376,6 +2372,7 @@ class ResearchPipeline:
                 "execution_engine",
             ),
             "research_relevance_filter": True,
+            "cross_encoder_reranking": self.enable_reranking,
         }
 
         engine_metadata = result_data.get(
@@ -2617,7 +2614,6 @@ class ResearchPipeline:
             dict,
         ):
             metadata = {}
-
         else:
             metadata = dict(
                 metadata
@@ -2693,7 +2689,6 @@ class ResearchPipeline:
             or ""
         )
 
-        # Preserve source metadata.
         for key in (
             "year",
             "publication_year",
@@ -2728,8 +2723,6 @@ class ResearchPipeline:
             ):
                 metadata[key] = data[key]
 
-        # Also retrieve score values from object attributes when model_dump()
-        # did not expose them.
         for key in (
             "score",
             "rerank_score",
@@ -2803,18 +2796,6 @@ class ResearchPipeline:
                     supporting_text[:1500]
                     + "..."
                 )
-
-            metadata = getattr(
-                source,
-                "metadata",
-                {},
-            )
-
-            if not isinstance(
-                metadata,
-                dict,
-            ):
-                metadata = {}
 
             relevance_score = self._source_relevance_score(
                 source

@@ -1,4 +1,3 @@
-
 from __future__ import annotations
 
 from enum import Enum
@@ -97,6 +96,12 @@ class QueryComplexity(str, Enum):
 class AdaptiveRAGConfig(BaseModel):
     """
     Configuration for Adaptive RAG planning.
+
+    CrossEncoder reranking is opt-in. The default lightweight retrieval
+    path does not require loading the transformer/PyTorch reranker.
+
+    Deployments that support reranking can explicitly enable it at the
+    request, plan, or application configuration level.
     """
 
     model_config = ConfigDict(
@@ -123,12 +128,19 @@ class AdaptiveRAGConfig(BaseModel):
         le=1.0,
     )
 
-    # Reranking remains available globally.
-    # Individual retrieval requests can explicitly enable it.
-    enable_reranking: bool = True
+    # IMPORTANT:
+    #
+    # CrossEncoder reranking is disabled by default because it requires
+    # loading a transformer/PyTorch model and therefore has a substantially
+    # higher memory footprint.
+    #
+    # Individual retrieval requests can still explicitly enable reranking.
+    enable_reranking: bool = False
 
     enable_query_expansion: bool = True
+
     enable_multi_query: bool = True
+
     enable_multi_hop: bool = True
 
     max_queries: int = Field(
@@ -170,7 +182,9 @@ class QueryClassification(BaseModel):
     )
 
     requires_multiple_documents: bool = False
+
     requires_broad_search: bool = False
+
     requires_multi_hop: bool = False
 
 
@@ -286,8 +300,11 @@ class HybridSearchResult(BaseModel):
     )
 
     dense_score: float = 0.0
+
     sparse_score: float = 0.0
+
     fusion_score: float = 0.0
+
     score: float = 0.0
 
 
@@ -339,12 +356,17 @@ class SearchResult(BaseModel):
     retrieval_method: RetrievalMode = RetrievalMode.HYBRID
 
     vector_score: Optional[float] = None
+
     keyword_score: Optional[float] = None
+
     rerank_score: Optional[float] = None
 
     chunk_id: Optional[str] = None
+
     document_id: Optional[str] = None
+
     source_id: Optional[str] = None
+
     paper_id: Optional[str] = None
 
 
@@ -372,12 +394,17 @@ class RetrievalFilters(BaseModel):
     )
 
     paper_id: Optional[str] = None
+
     document_id: Optional[str] = None
+
     source_id: Optional[str] = None
+
     chunk_id: Optional[str] = None
 
     source_type: Optional[str] = None
+
     author: Optional[str] = None
+
     title: Optional[str] = None
 
     year_from: Optional[int] = Field(
@@ -429,7 +456,7 @@ class RetrievalQuery(BaseModel):
     """
 
     model_config = ConfigDict(
-        extra="allow"
+        extra="allow",
     )
 
     query: str
@@ -459,8 +486,9 @@ class RetrievalQuery(BaseModel):
     )
 
     # IMPORTANT:
-    # Keep reranking opt-in for lightweight retrieval paths such as
-    # Explore. Explicit research workflows can still enable it.
+    #
+    # Keep reranking opt-in for lightweight retrieval paths such as Explore.
+    # Explicit workflows can still enable it.
     enable_reranking: bool = False
 
     metadata: dict[str, Any] = Field(
@@ -493,12 +521,17 @@ class RetrievedDocument(BaseModel):
     score: float = 0.0
 
     source_id: Optional[str] = None
+
     document_id: Optional[str] = None
+
     chunk_id: Optional[str] = None
+
     paper_id: Optional[str] = None
 
     source: Optional[str] = None
+
     title: Optional[str] = None
+
     author: Optional[str] = None
 
     metadata: Dict[str, Any] = Field(
@@ -530,7 +563,9 @@ class RetrievalResult(BaseModel):
     score: float = 0.0
 
     vector_score: Optional[float] = None
+
     keyword_score: Optional[float] = None
+
     rerank_score: Optional[float] = None
 
     retrieval_method: RetrievalMode = RetrievalMode.HYBRID
@@ -634,7 +669,8 @@ class RetrievalPlan(BaseModel):
     )
 
     # IMPORTANT:
-    # Reranking is opt-in at the plan level as well.
+    #
+    # Reranking remains opt-in at the individual plan level.
     rerank: bool = False
 
     expand_query: bool = False
@@ -827,4 +863,3 @@ __all__ = [
     "QueryAnalysis",
     "RetrievalDecision",
 ]
-

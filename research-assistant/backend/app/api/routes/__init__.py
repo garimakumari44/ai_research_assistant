@@ -8,6 +8,7 @@ from app.api.routes.graph import router as graph_router
 from app.api.routes.research import router as research_router
 from app.api.routes.collections import router as collections_router
 from app.api.routes.reports import router as reports_router
+from app.api.routes.assistant import router as assistant_router
 
 
 api_router = APIRouter(
@@ -75,6 +76,15 @@ api_router.include_router(
 
 api_router.include_router(
     collections_router,
+)
+
+
+# ============================================================
+# ASSISTANT
+# ============================================================
+
+api_router.include_router(
+    assistant_router,
 )
 
 

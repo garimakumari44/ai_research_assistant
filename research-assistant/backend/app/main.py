@@ -30,6 +30,70 @@ VECTOR_DIMENSION = 384
 
 
 # ============================================================================
+# MEMORY MONITORING
+# ============================================================================
+
+def _log_memory(label: str) -> None:
+    """
+    Log current and peak process memory.
+
+    On Linux/Render:
+        VmRSS = current resident memory
+        VmHWM = peak resident memory
+
+    On environments where /proc/self/status is unavailable,
+    memory logging is skipped safely.
+    """
+
+    try:
+        current_mb: float | None = None
+        peak_mb: float | None = None
+
+        with open(
+            "/proc/self/status",
+            "r",
+            encoding="utf-8",
+        ) as file:
+            for line in file:
+                if line.startswith("VmRSS:"):
+                    current_kb = int(line.split()[1])
+                    current_mb = current_kb / 1024
+
+                elif line.startswith("VmHWM:"):
+                    peak_kb = int(line.split()[1])
+                    peak_mb = peak_kb / 1024
+
+        if current_mb is None:
+            print(
+                f"[MEMORY] {label}: "
+                "current memory unavailable"
+            )
+            return
+
+        if peak_mb is None:
+            peak_mb = current_mb
+
+        print(
+            f"[MEMORY] {label}: "
+            f"current={current_mb:.1f} MB, "
+            f"peak={peak_mb:.1f} MB"
+        )
+
+    except FileNotFoundError:
+        # Windows/local development does not expose /proc/self/status.
+        print(
+            f"[MEMORY] {label}: "
+            "Linux /proc memory metrics unavailable."
+        )
+
+    except Exception as exc:
+        print(
+            f"[MEMORY] {label}: "
+            f"unable to read memory usage: {exc}"
+        )
+
+
+# ============================================================================
 # CORS
 # ============================================================================
 
@@ -73,6 +137,8 @@ async def _load_chunks() -> list[Chunk]:
 
     PostgreSQL is authoritative for chunk and paper metadata.
     """
+
+    _log_memory("before PostgreSQL chunk load")
 
     async with AsyncSessionLocal() as session:
         result = await session.execute(
@@ -124,6 +190,10 @@ async def _load_chunks() -> list[Chunk]:
 
             chunks.append(chunk)
 
+        _log_memory(
+            f"after PostgreSQL chunk load ({len(chunks)} chunks)"
+        )
+
         return chunks
 
 
@@ -138,6 +208,8 @@ async def _restore_keyword_index(
     """
     Rebuild the keyword/BM25 index from PostgreSQL.
     """
+
+    _log_memory("before keyword index restoration")
 
     keyword_items: list[KeywordIndexItem] = []
 
@@ -162,6 +234,10 @@ async def _restore_keyword_index(
             keyword_items
         )
 
+    _log_memory(
+        f"after keyword index restoration ({len(keyword_items)} items)"
+    )
+
     return len(keyword_items)
 
 
@@ -180,9 +256,13 @@ async def _restore_persisted_vector_index(
     PostgreSQL is authoritative for metadata.
     """
 
+    _log_memory("before FAISS restoration")
+
     persistence = FAISSPersistence()
 
     persisted = persistence.load()
+
+    _log_memory("after loading persisted FAISS state")
 
     if persisted is None:
         print(
@@ -213,6 +293,10 @@ async def _restore_persisted_vector_index(
     vectors = np.asarray(
         persisted_vectors,
         dtype=np.float32,
+    )
+
+    _log_memory(
+        f"after loading vectors ({len(vectors)} vectors)"
     )
 
     if vectors.size == 0:
@@ -269,6 +353,8 @@ async def _restore_persisted_vector_index(
         for chunk in chunks
     }
 
+    _log_memory("after building chunk lookup")
+
     vector_items: list[VectorIndexItem] = []
     missing_chunks: list[str] = []
 
@@ -306,9 +392,15 @@ async def _restore_persisted_vector_index(
             )
         )
 
+    _log_memory(
+        f"after building vector items ({len(vector_items)} items)"
+    )
+
     index_registry.vector.restore_items(
         vector_items
     )
+
+    _log_memory("after restoring vector index")
 
     restored_count = await index_registry.vector.count()
 
@@ -344,6 +436,8 @@ async def _load_persisted_indexes(
     """
     Restore keyword and vector indexes.
     """
+
+    _log_memory("before retrieval index restoration")
 
     print(
         "Restoring retrieval indexes..."
@@ -382,6 +476,8 @@ async def _load_persisted_indexes(
         f"{stats}"
     )
 
+    _log_memory("after complete retrieval index restoration")
+
     if vector_count == 0 and len(chunks) > 0:
         print(
             "WARNING: PostgreSQL contains chunks but the "
@@ -404,6 +500,8 @@ async def lifespan(app: FastAPI):
     Application startup and shutdown lifecycle.
     """
 
+    _log_memory("process startup")
+
     print(
         f"Starting {settings.APP_NAME} "
         f"v{settings.APP_VERSION}..."
@@ -415,6 +513,8 @@ async def lifespan(app: FastAPI):
 
     index_registry = IndexRegistry.create()
 
+    _log_memory("after IndexRegistry initialization")
+
     print(
         "IndexRegistry initialized."
     )
@@ -422,6 +522,8 @@ async def lifespan(app: FastAPI):
     index_manager = IndexManager(
         index_registry=index_registry,
     )
+
+    _log_memory("after IndexManager initialization")
 
     print(
         "IndexManager initialized."
@@ -439,11 +541,17 @@ async def lifespan(app: FastAPI):
             index_registry
         )
 
+        _log_memory("application startup completed")
+
         print(
             "Application startup completed."
         )
 
     except Exception as exc:
+        _log_memory(
+            "startup after retrieval-index restoration failure"
+        )
+
         # IMPORTANT:
         #
         # Retrieval-index restoration must NOT prevent FastAPI itself
@@ -471,6 +579,8 @@ async def lifespan(app: FastAPI):
         try:
             stats = await index_registry.get_stats()
 
+            _log_memory("before IndexRegistry shutdown")
+
             print(
                 "Index registry before shutdown: "
                 f"{stats}"
@@ -484,6 +594,8 @@ async def lifespan(app: FastAPI):
 
         try:
             await index_registry.clear()
+
+            _log_memory("after IndexRegistry clear")
 
             print(
                 "IndexRegistry cleared."

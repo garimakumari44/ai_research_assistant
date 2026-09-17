@@ -169,6 +169,32 @@ class Settings(BaseSettings):
     EMBEDDING_TIMEOUT: int = 60
 
     # ========================================================================
+    # RETRIEVAL / RERANKING
+    # ========================================================================
+
+    # CrossEncoder reranking requires a transformer/PyTorch runtime and
+    # therefore has a significantly higher memory footprint than the
+    # lightweight retrieval path.
+    #
+    # Keep this disabled by default so constrained deployments such as
+    # Render's 512 MB instance do not load the CrossEncoder model.
+    #
+    # It can be explicitly enabled through the environment:
+    #
+    #   ENABLE_CROSS_ENCODER_RERANKING=true
+    #
+    ENABLE_CROSS_ENCODER_RERANKING: bool = False
+
+    # CrossEncoder model used when reranking is explicitly enabled.
+    CROSS_ENCODER_MODEL: str = (
+        "BAAI/bge-reranker-base"
+    )
+
+    # Keep the inference batch small to reduce peak memory usage when
+    # CrossEncoder reranking is enabled.
+    RERANK_BATCH_SIZE: int = 4
+
+    # ========================================================================
     # LLM
     # ========================================================================
 

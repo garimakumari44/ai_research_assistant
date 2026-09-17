@@ -1,3 +1,4 @@
+
 from __future__ import annotations
 
 from fastapi import APIRouter
@@ -12,6 +13,7 @@ from app.api.routes.reports import router as reports_router
 from app.api.routes.research import router as research_router
 from app.api.routes.retrieval import router as retrieval_router
 from app.api.routes.adaptive_rag import router as adaptive_rag_router
+from app.api.routes.assistant import router as assistant_router
 
 
 api_router = APIRouter(
@@ -92,6 +94,15 @@ api_router.include_router(
 
 
 # ============================================================================
+# ASSISTANT
+# ============================================================================
+
+api_router.include_router(
+    assistant_router,
+)
+
+
+# ============================================================================
 # COLLECTIONS
 # ============================================================================
 
@@ -107,3 +118,4 @@ api_router.include_router(
 api_router.include_router(
     reports_router,
 )
+
