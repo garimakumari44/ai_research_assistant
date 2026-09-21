@@ -7,14 +7,8 @@
 </p>
 
 <p align="center">
-  <strong>Discover papers · Retrieve evidence · Analyze literature · Explore research frontiers</strong>
-</p>
-
-<p align="center">
-  <a href="https://ai-research-assistant-wine.vercel.app">Live Application</a>
-  ·
-  <a href="https://youtu.be/EnA22WtY6Sc">Watch Demo</a>
-  ·
+  <a href="https://ai-research-assistant-wine.vercel.app">Live Application</a> •
+  <a href="https://youtu.be/EnA22WtY6Sc">Watch Demo</a> •
   <a href="https://ai-research-assistant-xtjz.onrender.com/docs">API Documentation</a>
 </p>
 
@@ -22,69 +16,95 @@
 
 ## Overview
 
-**AI Research Assistant** is a research-focused AI platform designed for working with **AI research papers**.
+**AI Research Assistant** is a production-oriented research intelligence platform designed to help researchers discover, retrieve, analyze, connect, and synthesize AI research papers.
 
-It combines:
+Instead of treating research as a simple semantic-search problem, the platform combines:
 
 * Research paper ingestion
-* Structured research knowledge
-* Hybrid retrieval
-* Adaptive RAG
-* Evidence collection and verification
-* Research synthesis
-* Knowledge graph exploration
+* Structured document and knowledge management
+* Dense and lexical retrieval
+* Hybrid retrieval and Reciprocal Rank Fusion
+* Adaptive RAG orchestration
+* Evidence collection and attribution
+* Multi-step research planning
+* Cross-paper synthesis
+* Knowledge graph construction
 * Research reports
-* Research evaluation
-* Self-improvement
+* Retrieval and generation evaluation
+* Self-improvement workflows
 * Research frontier intelligence
 
-The platform is designed around a simple principle:
+The system separates **reusable retrieval infrastructure** from **adaptive retrieval intelligence**, allowing the same retrieval foundation to support simple search, complex research workflows, graph-based exploration, and iterative RAG strategies.
 
-> **Retrieval should be evidence-driven, adaptive, observable, and reusable across the entire research workflow.**
+---
 
-Instead of building a conventional:
-
-```text
-Question
-   ↓
-Vector Search
-   ↓
-LLM
-   ↓
-Answer
-```
-
-pipeline, the system separates research into multiple intelligent layers:
+# Platform at a Glance
 
 ```text
 Research Sources
-       ↓
-    Ingestion
-       ↓
-Normalization / Deduplication
-       ↓
-Research Corpus
-       ↓
-Knowledge Layer
-       ↓
-Retrieval
-       ↓
-Adaptive RAG
-       ↓
-Evidence
-       ↓
-Research Intelligence
-       ↓
-Frontier Intelligence
-       ↓
-Researcher
+      │
+      ▼
+┌───────────────────────┐
+│ Ingestion             │
+│ discovery • parsing   │
+│ normalization • dedup │
+└──────────┬────────────┘
+           │
+           ▼
+┌───────────────────────┐
+│ Knowledge Layer       │
+│ papers • chunks       │
+│ embeddings • graph    │
+└──────────┬────────────┘
+           │
+           ▼
+┌───────────────────────┐
+│ Retrieval             │
+│ dense • BM25 • hybrid │
+│ RRF • reranking       │
+└──────────┬────────────┘
+           │
+           ▼
+┌───────────────────────┐
+│ Adaptive RAG          │
+│ routing • planning    │
+│ iterative retrieval   │
+└──────────┬────────────┘
+           │
+           ▼
+┌───────────────────────┐
+│ Evidence              │
+│ claims • attribution  │
+│ validation • coverage │
+└──────────┬────────────┘
+           │
+           ▼
+┌───────────────────────┐
+│ Research Intelligence │
+│ synthesis • citations │
+│ reports • analysis    │
+└──────────┬────────────┘
+           │
+           ▼
+┌───────────────────────┐
+│ Frontier Intelligence │
+│ trends • novelty      │
+│ gaps • opportunities  │
+└──────────┬────────────┘
+           │
+           ▼
+        Researcher
 ```
-
-The current product focus is **AI research papers**, while the underlying architecture is designed to support broader research domains in the future.
 
 ---
 
 # Demo
+
+<p align="center">
+  <img src="docs/img/research_assistant_gif.gif" alt="AI Research Assistant Demo" width="1000"/>
+</p>
+
+### Video Demo
 
 <p align="center">
   <a href="https://youtu.be/EnA22WtY6Sc">
@@ -92,102 +112,100 @@ The current product focus is **AI research papers**, while the underlying archit
   </a>
 </p>
 
-<p align="center">
-  <a href="https://youtu.be/EnA22WtY6Sc">
-    <strong>Watch the full demo on YouTube →</strong>
-  </a>
-</p>
-
 ---
 
 # Live System
 
-| Component         | Environment                                                                  |
-| ----------------- | ---------------------------------------------------------------------------- |
-| Web Application   | [AI Research Assistant](https://ai-research-assistant-wine.vercel.app)       |
-| Backend API       | [FastAPI Backend](https://ai-research-assistant-xtjz.onrender.com)           |
-| API Documentation | [OpenAPI / Swagger](https://ai-research-assistant-xtjz.onrender.com/docs)    |
-| OpenAPI Schema    | [OpenAPI JSON](https://ai-research-assistant-xtjz.onrender.com/openapi.json) |
-| Source Code       | [GitHub Repository](https://github.com/garimakumari44/ai_research_assistant) |
-| Demo              | [YouTube](https://youtu.be/EnA22WtY6Sc)                                      |
+| Component         | URL                                                          |
+| ----------------- | ------------------------------------------------------------ |
+| Web Application   | https://ai-research-assistant-wine.vercel.app                |
+| Backend API       | https://ai-research-assistant-xtjz.onrender.com              |
+| API Documentation | https://ai-research-assistant-xtjz.onrender.com/docs         |
+| OpenAPI Schema    | https://ai-research-assistant-xtjz.onrender.com/openapi.json |
+| GitHub Repository | https://github.com/garimakumari44/ai_research_assistant      |
 
 ---
 
 # What the Platform Does
 
-AI Research Assistant supports the complete research lifecycle:
+<p align="center">
+  <img src="docs/img/platform.png" alt="AI Research Assistant Platform" width="950"/>
+</p>
 
-```text
-Discover
-   ↓
-Ingest
-   ↓
-Understand
-   ↓
-Retrieve
-   ↓
-Verify
-   ↓
-Synthesize
-   ↓
-Compare
-   ↓
-Explore
-   ↓
-Identify Gaps
-   ↓
-Discover Emerging Directions
-```
+## 1. Research Paper Discovery
 
-## Core capabilities
+The ingestion layer connects the platform to research sources and normalizes research metadata into a unified representation.
 
-### Research Paper Discovery
-
-Connects research workflows to academic sources and paper metadata.
-
-Current ingestion providers include:
+Supported research providers include:
 
 * arXiv
 * OpenAlex
 * Semantic Scholar
 * Crossref
 
----
-
-### Hybrid Retrieval
-
-Combines multiple retrieval approaches rather than depending on a single vector search method.
+The ingestion pipeline is designed around:
 
 ```text
-Research Query
-      ↓
-Query Analysis
-      ↓
-Source Selection
-      ↓
-┌─────────────┬──────────────┐
-│             │              │
-Dense        BM25         Hybrid
-Search       Search       Retrieval
-│             │              │
-└─────────────┼──────────────┘
-              ↓
-          RRF / Ranking
-              ↓
-           Reranking
-              ↓
-        Context Compression
-              ↓
-            Evidence
+Source
+  ↓
+Discovery
+  ↓
+Parsing
+  ↓
+Normalization
+  ↓
+Deduplication
+  ↓
+Document Storage
+  ↓
+Chunking
+  ↓
+Indexing
 ```
 
 ---
 
-### Adaptive RAG
+## 2. Hybrid Research Retrieval
 
-Adaptive RAG sits above the retrieval infrastructure and determines **how retrieval should happen**.
+Research questions often require more than semantic similarity.
 
-Depending on the query and retrieval state, the system can use strategies such as:
+The retrieval system combines:
+
+* Dense vector retrieval
+* BM25 lexical retrieval
+* Hybrid retrieval
+* Reciprocal Rank Fusion
+* Metadata filtering
+* Ranking
+* Cross-encoder reranking
+* Context compression
+* Evidence extraction
+
+This allows the system to handle both:
+
+```text
+Semantic queries
+"How does retrieval augmentation improve reasoning?"
+```
+
+and:
+
+```text
+Exact research terminology
+"retrieval-augmented generation"
+"chain-of-thought"
+"Mixture of Experts"
+```
+
+---
+
+## 3. Adaptive RAG
+
+The platform does not force every question through the same retrieval strategy.
+
+The adaptive RAG layer analyzes the query and dynamically selects an appropriate strategy.
+
+Possible strategies include:
 
 * Direct retrieval
 * Multi-query retrieval
@@ -195,75 +213,63 @@ Depending on the query and retrieval state, the system can use strategies such a
 * Iterative retrieval
 * Graph-augmented retrieval
 
-The adaptive layer also evaluates retrieval quality and can continue or stop based on evidence sufficiency.
+The objective is to make retrieval **query-dependent rather than pipeline-dependent**.
 
 ---
 
-### Evidence-Grounded Research
+## 4. Evidence-Grounded Research
 
-The system separates evidence collection from final synthesis.
+Research answers are built around evidence rather than unsupported generation.
+
+The evidence pipeline follows:
 
 ```text
-Research Claim
-      ↓
+Question
+   ↓
+Claims
+   ↓
 Evidence Retrieval
-      ↓
-Source
-      ↓
-Paper
-      ↓
-Citation
-      ↓
-Verification
-      ↓
-Research Answer
+   ↓
+Evidence Collection
+   ↓
+Attribution
+   ↓
+Validation
+   ↓
+Coverage / Confidence
+   ↓
+Synthesis
 ```
 
-Evidence processing includes:
-
-* Evidence scoring
-* Provenance
-* Coverage
-* Corroboration
-* Contradiction detection
-* Evidence validation
+This provides a foundation for traceable research outputs.
 
 ---
 
-### Research Knowledge Graph
+## 5. Knowledge Graph
 
-Papers are connected through structured research entities.
+The graph layer connects research entities such as:
 
-```text
-Paper
- ├── Author
- ├── Topic
- ├── Citation
- ├── Method
- ├── Dataset
- └── Venue
-```
+* Papers
+* Authors
+* Topics
+* Concepts
+* Methods
+* Research relationships
 
-This supports:
-
-* Related paper discovery
-* Topic exploration
-* Citation relationships
-* Author relationships
-* Method discovery
-* Graph-augmented retrieval
-* Frontier analysis
+This enables graph-aware research exploration and provides an additional retrieval signal beyond vector similarity.
 
 ---
 
-### Research Synthesis
+## 6. Research Synthesis
 
-Research workflows can combine evidence across multiple papers.
+Complex research questions can be decomposed into multiple research tasks.
+
+The research pipeline supports:
 
 ```text
 Research Question
        ↓
-Research Planner
+Planning
        ↓
 Task Decomposition
        ↓
@@ -282,328 +288,130 @@ Research Report
 
 ---
 
-### Research Frontier Intelligence
-
-The Frontier layer goes beyond answering questions about existing papers.
-
-It analyzes how research areas evolve over time.
-
-```text
-Papers
-  ↓
-Topics
-  ↓
-Topic History
-  ↓
-Trends
-  ↓
-Research Signals
-  ↓
-Novelty
-  ↓
-Research Gaps
-  ↓
-Emerging Directions
-  ↓
-Research Opportunities
-```
-
----
-
 # System Architecture
-
-<p align="center">
-  <img src="docs/img/AI%20Research%20Assistant%20System%20Architecture.png"
-       alt="AI Research Assistant System Architecture"
-       width="1100"/>
-</p>
 
 The platform is organized around six major systems:
 
 ```text
-┌────────────────────────────────────────────────────────────┐
-│                    AI RESEARCH PLATFORM                    │
-├────────────────────────────────────────────────────────────┤
-│                                                            │
-│  1. INGESTION                                              │
-│     Papers / APIs / Documents                              │
-│                                                            │
-│  2. KNOWLEDGE                                              │
-│     Papers / Topics / Authors / Graph / Vectors            │
-│                                                            │
-│  3. RETRIEVAL                                              │
-│     Search / Hybrid Retrieval / Adaptive RAG               │
-│                                                            │
-│  4. RESEARCH INTELLIGENCE                                  │
-│     Research / Evidence / Synthesis / Reports              │
-│                                                            │
-│  5. FRONTIER INTELLIGENCE                                  │
-│     Trends / Signals / Novelty / Gaps / Opportunities      │
-│                                                            │
-│  6. LEARNING                                               │
-│     Evaluation / Feedback / Self-Improvement                │
-│                                                            │
-└────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────┐
+│              AI Research Assistant          │
+├─────────────────────────────────────────────┤
+│                                             │
+│  1. Ingestion                               │
+│     ↓                                       │
+│  2. Knowledge                               │
+│     ↓                                       │
+│  3. Retrieval                               │
+│     ↓                                       │
+│  4. Research Intelligence                  │
+│     ↓                                       │
+│  5. Frontier Intelligence                  │
+│     ↓                                       │
+│  6. Evaluation / Learning                  │
+│                                             │
+└─────────────────────────────────────────────┘
 ```
+
+### Architecture Diagram
+
+<p align="center">
+  <img src="docs/img/AI Research Assistant System Architecture.png" alt="AI Research Assistant System Architecture" width="1000"/>
+</p>
 
 ---
 
 # Architecture Philosophy
 
-A central architectural decision is the separation between:
+A central design principle is the separation between:
 
-```text
-Retrieval Infrastructure
-```
+### Retrieval Infrastructure
+
+Reusable mechanisms responsible for:
+
+* Query processing
+* Dense retrieval
+* BM25
+* Hybrid retrieval
+* RRF
+* Ranking
+* Reranking
+* Filtering
+* Evidence retrieval
 
 and:
 
-```text
-Adaptive Retrieval Intelligence
-```
+### Retrieval Intelligence
 
-These are intentionally different layers.
+Adaptive mechanisms responsible for:
 
-## Retrieval
+* Query classification
+* Retrieval planning
+* Strategy selection
+* Iterative retrieval
+* Self-reflection
+* Corrective retrieval
+* Graph-aware retrieval
+* Evidence sufficiency
 
-The retrieval system provides reusable search infrastructure.
-
-```text
-Query
- ↓
-Analysis
- ↓
-Source Selection
- ↓
-Dense / BM25 / Hybrid
- ↓
-Ranking
- ↓
-Reranking
- ↓
-Compression
- ↓
-Evidence
-```
-
-## Adaptive RAG
-
-Adaptive RAG decides **which retrieval strategy should be used**.
-
-```text
-Research Query
-      ↓
-Adaptive RAG
-      ↓
-Retrieval
-      ↓
-Evidence
-      ↓
-Research
-```
-
-This allows the same retrieval infrastructure to be reused by:
-
-```text
-Assistant
-Research
-Explore
-Graph
-Frontier
-```
-
-without duplicating retrieval logic.
+This separation makes the retrieval stack reusable across different research workflows.
 
 ---
 
 # Research Data Pipeline
 
-The research corpus begins with external academic sources.
-
 ```mermaid
-flowchart TD
+flowchart LR
+    A[arXiv] --> E[Ingestion]
+    B[OpenAlex] --> E
+    C[Semantic Scholar] --> E
+    D[Crossref] --> E
 
-    A[arXiv]
-    O[OpenAlex]
-    S[Semantic Scholar]
-    C[Crossref]
+    E --> F[Normalization]
+    F --> G[Deduplication]
+    G --> H[Research Papers]
 
-    I[Ingestion]
-    N[Normalization]
-    D[Deduplication]
+    H --> I[Chunking]
+    I --> J[Embeddings]
+    J --> K[Vector Index]
 
-    P[Papers]
-    G[Research Graph]
-    X[Indexing]
-
-    A --> I
-    O --> I
-    S --> I
-    C --> I
-
-    I --> N
-    N --> D
-
-    D --> P
-    P --> G
-    P --> X
-
-    classDef sky fill:#87CEEB,stroke:#1E5A78,color:#082F49,stroke-width:2px;
-    class A,O,S,C,I,N,D,P,G,X sky;
+    H --> L[Keyword Index]
+    H --> M[Knowledge Graph]
 ```
 
-The ingestion pipeline is implemented under:
-
-```text
-backend/app/ingestion/
-```
-
-### Providers
-
-```text
-backend/app/ingestion/providers/
-
-├── arxiv.py
-├── crossref.py
-├── openalex.py
-├── semantic_scholar.py
-├── manager.py
-└── base.py
-```
-
-### Processing flow
-
-```text
-Research Sources
-      ↓
-Download / Access
-      ↓
-Extraction
-      ↓
-Parsing
-      ↓
-Normalization
-      ↓
-Validation
-      ↓
-Deduplication
-      ↓
-Paper Corpus
-```
+The ingestion architecture creates a common research corpus from heterogeneous sources.
 
 ---
 
 # Knowledge Layer
 
-The knowledge layer transforms raw research documents into structured research entities.
-
-Implemented under:
+The knowledge layer transforms raw research documents into structured searchable knowledge.
 
 ```text
-backend/app/knowledge/
+Research Paper
+      │
+      ├── Metadata
+      │
+      ├── Sections
+      │
+      ├── Chunks
+      │
+      ├── Embeddings
+      │
+      ├── Keywords
+      │
+      ├── Entities
+      │
+      └── Relationships
 ```
 
-It handles:
+Core responsibilities include:
 
-* Document structure
-* Sections
-* Semantic chunking
-* Structural chunking
-* Embeddings
+* Document management
+* Chunking
+* Embedding generation
 * Vector indexing
 * Keyword indexing
-* Index management
-
-The research domain is represented through entities such as:
-
-```text
-Paper
-Author
-Topic
-Citation
-Method
-Dataset
-Venue
-Document
-Section
-Chunk
-```
-
----
-
-# Research Knowledge Graph
-
-Implemented under:
-
-```text
-backend/app/graph/
-```
-
-The graph contains:
-
-```text
-graph/
-├── builder.py
-├── models.py
-├── schemas.py
-├── service.py
-├── traversal.py
-│
-├── extractors/
-│   ├── author.py
-│   ├── dataset.py
-│   ├── method.py
-│   ├── paper.py
-│   ├── topic.py
-│   └── venue.py
-│
-└── queries/
-    ├── authors.py
-    ├── methods.py
-    ├── papers.py
-    └── topics.py
-```
-
-## Research graph model
-
-```mermaid
-flowchart TD
-
-    PAPER[Paper]
-    TOPIC[Topic]
-    AUTHOR[Author]
-    CITATION[Citation]
-    METHOD[Method]
-    DATASET[Dataset]
-    VENUE[Venue]
-
-    PAPER --> TOPIC
-    PAPER --> AUTHOR
-    PAPER --> CITATION
-    PAPER --> METHOD
-    PAPER --> DATASET
-    PAPER --> VENUE
-
-    CITATION --> PAPER
-    AUTHOR --> PAPER
-    TOPIC --> PAPER
-    METHOD --> PAPER
-    DATASET --> PAPER
-    VENUE --> PAPER
-
-    classDef sky fill:#87CEEB,stroke:#1E5A78,color:#082F49,stroke-width:2px;
-    class PAPER,TOPIC,AUTHOR,CITATION,METHOD,DATASET,VENUE sky;
-```
-
-The graph supports:
-
-* Related paper discovery
-* Topic exploration
-* Citation traversal
-* Author exploration
-* Method discovery
-* Graph-augmented retrieval
-* Frontier analysis
+* Graph construction
 
 ---
 
@@ -615,744 +423,458 @@ The reusable retrieval infrastructure lives under:
 backend/app/retrieval/
 ```
 
-It contains:
+The retrieval layer contains components for:
 
 ```text
-retrieval/
-├── config.py
-├── models.py
-├── pipeline.py
-├── query.py
-├── service.py
-│
-├── advanced/
-│   ├── intent_classifier.py
-│   ├── query_decomposer.py
-│   ├── query_rewriter.py
-│   ├── retrieval_planner.py
-│   └── source_selector.py
-│
-├── dense/
-│   └── vector_search.py
-│
-├── sparse/
-│   └── bm25.py
-│
-├── hybrid/
-│   └── fusion.py
-│
-├── ranking/
-│   ├── cross_encoder.py
-│   ├── rrf.py
-│   └── score_normalizer.py
-│
-├── reranking/
-│   └── reranker.py
-│
-├── compression/
-│   ├── context_ordering.py
-│   ├── duplicate_remover.py
-│   ├── semantic_compressor.py
-│   └── token_optimizer.py
-│
-├── filters/
-│   └── metadata_filter.py
-│
-├── evidence/
-│   ├── collector.py
-│   ├── coverage.py
-│   ├── provenance.py
-│   └── scorer.py
-│
-├── retrievers/
-│   ├── dense.py
-│   ├── hybrid.py
-│   └── keyword.py
-│
-└── sources/
-    ├── arxiv_source.py
-    ├── bm25_source.py
-    ├── documentation_source.py
-    ├── github_source.py
-    ├── vector_source.py
-    └── router.py
+Query Analysis
+      ↓
+Query Classification
+      ↓
+Query Rewriting
+      ↓
+Source Selection
+      ↓
+Dense Retrieval ─────┐
+                     │
+BM25 Retrieval ──────┤
+                     ▼
+               Hybrid Retrieval
+                     │
+                     ▼
+              Reciprocal Rank Fusion
+                     │
+                     ▼
+                  Ranking
+                     │
+                     ▼
+                Reranking
+                     │
+                     ▼
+               Compression
+                     │
+                     ▼
+                  Evidence
 ```
-
-This layer provides reusable retrieval infrastructure for:
-
-* Query analysis
-* Query classification
-* Query rewriting
-* Retrieval planning
-* Source selection
-* Dense search
-* BM25
-* Hybrid retrieval
-* Reciprocal Rank Fusion
-* Ranking
-* Reranking
-* Metadata filtering
-* Context compression
-* Evidence collection
 
 ---
 
-# Adaptive RAG
+# Adaptive RAG Architecture
 
-Adaptive RAG is implemented separately under:
+Adaptive retrieval intelligence lives under:
 
 ```text
 backend/app/adaptive_rag/
 ```
 
-It is responsible for **retrieval decisions, orchestration, evaluation, and reflection** rather than duplicating the retrieval engine.
+The high-level flow is:
 
 ```text
-adaptive_rag/
-├── controller.py
-├── domain_models.py
-├── evaluator.py
-├── exceptions.py
-├── generation.py
-├── planner.py
-├── router.py
-├── state.py
-│
-├── adapters/
-│   └── retrieval.py
-│
-├── evaluation/
-├── evidence/
-├── models/
-├── observability/
-├── orchestration/
-├── policies/
-├── routing/
-├── self_reflection/
-└── strategies/
+                    Query
+                      │
+                      ▼
+               Query Analysis
+                      │
+                      ▼
+                RAG Planning
+                      │
+                      ▼
+              Adaptive Router
+                      │
+       ┌──────────────┼──────────────┐
+       ▼              ▼              ▼
+    Direct        Multi-Query     Corrective
+   Retrieval       Retrieval      Retrieval
+       │              │              │
+       └──────────────┼──────────────┘
+                      │
+                      ▼
+             Ranking / Reranking
+                      │
+                      ▼
+                   Evidence
+                      │
+                      ▼
+                 Evaluation
+                      │
+                      ▼
+                Self-Reflection
+                      │
+                ┌─────┴─────┐
+                │           │
+             Sufficient?    No
+                │           │
+               Yes          └──────► Iterate
+                │
+                ▼
+              Answer
 ```
 
-## Adaptive retrieval strategies
-
-```text
-Direct
-Multi Query
-Corrective
-Iterative
-Graph Augmented
-```
-
----
-
-# Adaptive RAG Flow
-
-```mermaid
-flowchart TD
-
-    Q[Research Query]
-    A[Query Analysis]
-    P[Research Planning]
-    R[Adaptive Router]
-
-    D[Direct Retrieval]
-    M[Multi Query]
-    C[Corrective Retrieval]
-    I[Iterative Retrieval]
-    G[Graph Augmented Retrieval]
-
-    RET[Retrieval Engine]
-    RANK[Ranking / Reranking]
-    E[Evidence]
-    EV[Evaluation]
-    REF[Self Reflection]
-
-    STOP{Sufficient?}
-    ANSWER[Research Answer]
-
-    Q --> A
-    A --> P
-    P --> R
-
-    R --> D
-    R --> M
-    R --> C
-    R --> I
-    R --> G
-
-    D --> RET
-    M --> RET
-    C --> RET
-    I --> RET
-    G --> RET
-
-    RET --> RANK
-    RANK --> E
-    E --> EV
-    EV --> REF
-    REF --> STOP
-
-    STOP -->|Yes| ANSWER
-    STOP -->|No| R
-
-    classDef sky fill:#87CEEB,stroke:#1E5A78,color:#082F49,stroke-width:2px;
-    class Q,A,P,R,D,M,C,I,G,RET,RANK,E,EV,REF,STOP,ANSWER sky;
-```
+The adaptive controller can therefore treat retrieval as a decision-making problem rather than a fixed sequence of operations.
 
 ---
 
 # Evidence Architecture
 
-Evidence is treated as a first-class component of the research system.
+Evidence is treated as a first-class research object.
 
 ```text
 Claim
- ↓
-Retrieval
- ↓
+  │
+  ▼
+Evidence Retrieval
+  │
+  ▼
 Evidence Collection
- ↓
+  │
+  ▼
 Source Attribution
- ↓
-Validation
- ↓
-Coverage / Confidence
- ↓
-Synthesis
+  │
+  ▼
+Evidence Validation
+  │
+  ├── Coverage
+  ├── Confidence
+  └── Source Quality
+  │
+  ▼
+Research Synthesis
 ```
 
-Adaptive RAG evidence modules include:
-
-```text
-Evidence Collector
-Evidence Scorer
-Evidence Validator
-Provenance
-Coverage
-Corroboration
-Contradiction Detection
-```
-
-This architecture allows the system to distinguish between:
-
-```text
-Retrieved Context
-```
-
-and:
-
-```text
-Validated Research Evidence
-```
+This architecture supports traceable answers and research reports where claims can be connected to supporting sources.
 
 ---
 
 # Research Intelligence
 
-The research workflow is implemented under:
+The research intelligence layer orchestrates multi-step research workflows.
+
+```text
+Research Question
+       │
+       ▼
+Research Planner
+       │
+       ▼
+Task Decomposition
+       │
+       ▼
+Adaptive Retrieval
+       │
+       ▼
+Evidence Collection
+       │
+       ▼
+Evidence Validation
+       │
+       ▼
+Cross-Paper Synthesis
+       │
+       ▼
+Citation Generation
+       │
+       ▼
+Research Report
+```
+
+The research layer is implemented under:
 
 ```text
 backend/app/research/
 ```
 
-The layer includes:
+It contains components for:
 
-```text
-research/
-├── dependencies.py
-├── models.py
-├── pipeline.py
-├── planner.py
-├── service.py
-│
-├── citation/
-│   ├── formatter.py
-│   └── generator.py
-│
-├── evidence/
-│   ├── collector.py
-│   ├── tracker.py
-│   └── validator.py
-│
-├── reports/
-│   └── builder.py
-│
-├── retrieval/
-│   ├── docs_retriever.py
-│   ├── github_retriever.py
-│   └── paper_retriever.py
-│
-└── synthesis/
-    ├── comparator.py
-    ├── summarizer.py
-    └── synthesizer.py
-```
-
-## Research workflow
-
-```text
-Research Question
-       ↓
-Research Planner
-       ↓
-Task Decomposition
-       ↓
-Adaptive Retrieval
-       ↓
-Evidence Collection
-       ↓
-Evidence Validation
-       ↓
-Cross-Paper Synthesis
-       ↓
-Citation Generation
-       ↓
-Research Report
-```
+* Research planning
+* Research pipelines
+* Evidence handling
+* Citation management
+* Retrieval integration
+* Synthesis
+* Report generation
 
 ---
 
-# LLM and Generation Layer
+# Knowledge Graph
 
-LLM functionality is separated from retrieval and research orchestration.
-
-Implemented under:
+The graph subsystem lives under:
 
 ```text
-backend/app/llm/
-backend/app/generation/
+backend/app/graph/
 ```
 
-The LLM abstraction supports provider integrations including:
+It provides:
+
+* Graph construction
+* Entity extraction
+* Relationship extraction
+* Graph traversal
+* Graph queries
+* Research relationship modeling
+
+Conceptually:
 
 ```text
-OpenAI
-OpenRouter
-Gemini
-Ollama
+              Paper
+             /     \
+            /       \
+        Author      Topic
+           |          |
+         Method ─── Concept
+            \         /
+             \       /
+              Related
+              Papers
 ```
 
-The generation architecture includes:
-
-```text
-LLM Provider
-     ↓
-Prompt Construction
-     ↓
-Context
-     ↓
-Research Synthesis
-     ↓
-Citation Generation
-     ↓
-Citation Verification
-     ↓
-Response
-```
-
-This separation allows retrieval and research orchestration to remain independent from a particular LLM provider.
+Graph relationships can provide additional context for research discovery and graph-augmented retrieval.
 
 ---
 
-# Research Frontier Intelligence
+# Frontier Intelligence
 
-The Frontier system is implemented under:
+The frontier intelligence layer is designed to identify emerging research directions from the research corpus.
+
+The current architecture combines:
+
+* Trend analysis
+* Topic evolution
+* Novelty signals
+* Research gaps
+* Frontier detection
+* Evidence-backed opportunity analysis
+
+Conceptual flow:
+
+```text
+Paper
+  ↓
+Topic
+  ↓
+Topic History
+  ↓
+Trend Signals
+  ↓
+Growth / Novelty / Momentum
+  ↓
+Frontier Detection
+  ↓
+Research Gaps
+  ↓
+Research Opportunities
+  ↓
+Frontier Snapshot
+```
+
+The frontier subsystem lives under:
 
 ```text
 backend/app/frontier/
 ```
 
-Current modules include:
+with modules including:
 
 ```text
-frontier/
-├── detector.py
-├── gaps.py
-├── novelty.py
-├── service.py
-└── trends.py
+detector.py
+gaps.py
+novelty.py
+service.py
+trends.py
 ```
 
-The Frontier layer is designed to answer questions such as:
-
-```text
-How is this research topic evolving?
-
-Which areas are growing?
-
-Which directions appear novel?
-
-Where are research gaps?
-
-Which topics are converging?
-
-What emerging research directions deserve further investigation?
-```
-
----
-
-# Frontier Entity Model
+### Frontier Intelligence Architecture
 
 ```mermaid
 flowchart TD
+    A[Research Sources] --> B[Ingestion]
+    B --> C[Normalization]
+    C --> D[Deduplication]
+    D --> E[Research Papers]
 
-    PAPER[Paper]
-    TOPIC[Topic]
-    AUTHOR[Author]
-    CITATION[Citation]
+    E --> F[Knowledge Graph]
+    E --> G[Topic History]
 
-    TREND[Topic Trend]
-    SIGNAL[Frontier Signals]
+    G --> H[Trend Engine]
+    H --> I[Trend Signals]
 
-    NOVELTY[Novelty]
-    MOMENTUM[Momentum]
-    GROWTH[Growth]
+    I --> J[Publication Growth]
+    I --> K[Citation Velocity]
+    I --> L[Terminology Growth]
+    I --> M[Cross-Topic Convergence]
 
-    FORECAST[Forecast]
-    EVIDENCE[Evidence]
-    OPPORTUNITY[Research Opportunity]
-    SNAPSHOT[Frontier Snapshot]
+    J --> N[Frontier Detection]
+    K --> N
+    L --> N
+    M --> N
 
-    PAPER --> TOPIC
-    PAPER --> AUTHOR
-    PAPER --> CITATION
-
-    TOPIC --> TREND
-    TREND --> SIGNAL
-
-    SIGNAL --> NOVELTY
-    SIGNAL --> MOMENTUM
-    SIGNAL --> GROWTH
-
-    NOVELTY --> FORECAST
-    MOMENTUM --> FORECAST
-    GROWTH --> FORECAST
-
-    FORECAST --> EVIDENCE
-    FORECAST --> OPPORTUNITY
-
-    EVIDENCE --> SNAPSHOT
-    OPPORTUNITY --> SNAPSHOT
-
-    classDef sky fill:#87CEEB,stroke:#1E5A78,color:#082F49,stroke-width:2px;
-    class PAPER,TOPIC,AUTHOR,CITATION,TREND,SIGNAL,NOVELTY,MOMENTUM,GROWTH,FORECAST,EVIDENCE,OPPORTUNITY,SNAPSHOT sky;
+    N --> O[Novelty Analysis]
+    O --> P[Research Gaps]
+    P --> Q[Opportunity Signals]
+    Q --> R[Frontier Snapshot]
 ```
+
+The frontier layer is intended to evolve toward increasingly sophisticated research trend and opportunity analysis as more historical research data becomes available.
 
 ---
 
-# Frontier Data Pipeline
+# LLM and Generation Layer
 
-```mermaid
-flowchart TD
-
-    A[arXiv]
-    O[OpenAlex]
-    S[Semantic Scholar]
-    C[Crossref]
-
-    I[Ingestion]
-    N[Normalization / Deduplication]
-    P[Papers]
-
-    G[Research Graph]
-    H[Topic History]
-    T[Trend Engine]
-    SE[Signal Engine]
-
-    PG[Publication Growth]
-    CV[Citation Velocity]
-    TG[Terminology Growth]
-
-    CONV[Cross-Topic Convergence]
-    NOV[Novelty Analysis]
-    FD[Frontier Detector]
-    F[Forecast]
-
-    V[Evidence Verification]
-    RO[Research Opportunities]
-    FS[Frontier Snapshot]
-
-    API[FastAPI Frontier API]
-    UI[Research Frontier UI]
-
-    A --> I
-    O --> I
-    S --> I
-    C --> I
-
-    I --> N
-    N --> P
-    N --> G
-
-    P --> H
-    G --> H
-
-    H --> T
-    T --> SE
-
-    SE --> PG
-    SE --> CV
-    SE --> TG
-
-    PG --> CONV
-    CV --> CONV
-    TG --> CONV
-
-    CONV --> NOV
-    NOV --> FD
-    FD --> F
-
-    F --> V
-    V --> RO
-    RO --> FS
-
-    FS --> API
-    API --> UI
-
-    classDef sky fill:#87CEEB,stroke:#1E5A78,color:#082F49,stroke-width:2px;
-    class A,O,S,C,I,N,P,G,H,T,SE,PG,CV,TG,CONV,NOV,FD,F,V,RO,FS,API,UI sky;
-```
-
-The important architectural principle is that Frontier Intelligence **reuses the existing research platform**.
+The platform supports multiple LLM providers through an abstraction layer.
 
 ```text
-                 FRONTIER INTELLIGENCE
-                          ↑
-          ┌───────────────┼───────────────┐
-          ↑               ↑               ↑
-      KNOWLEDGE       RETRIEVAL        RESEARCH
-          ↑               ↑               ↑
-          └───────────────┼───────────────┘
-                          ↑
-                      INGESTION
+                    LLM Provider Interface
+                             │
+          ┌──────────────────┼──────────────────┐
+          │                  │                  │
+       OpenAI            OpenRouter           Gemini
+          │                  │                  │
+          └──────────────────┼──────────────────┘
+                             │
+                           Ollama
 ```
 
----
-
-# Frontier API Flow
-
-A Frontier request follows the same underlying knowledge and evidence infrastructure.
+Provider implementations are located under:
 
 ```text
-Frontier Request
-      ↓
-Frontier Service
-      ↓
-┌────────────┬────────────┐
-│            │            │
-Graph     Retrieval     Evidence
-│            │            │
-Topics      Papers      Citations
-└────────────┴────────────┘
-      ↓
-   Signals
-      ↓
-  Forecast
-      ↓
-Evidence Verification
-      ↓
-Research Opportunity
-      ↓
-Frontier Snapshot
-      ↓
-Frontier UI
+backend/app/llm/providers/
 ```
 
-The API layer is exposed under the versioned FastAPI API.
+This abstraction allows model providers to be changed without coupling the research pipeline to a single vendor.
 
 ---
 
 # Evaluation
 
-Evaluation is implemented under:
+Evaluation is treated as part of the platform architecture rather than an external afterthought.
+
+The evaluation layer includes:
+
+### Retrieval Metrics
+
+* Precision
+* Recall
+* MRR
+* nDCG
+
+### Generation Metrics
+
+* Faithfulness
+* Relevance
+* Contextual precision
+* Contextual recall
+
+### System Metrics
+
+* Retrieval latency
+* Generation latency
+* End-to-end latency
+
+Supported evaluation frameworks include:
+
+* RAGAS
+* DeepEval
+
+Evaluation components live under:
 
 ```text
 backend/app/evaluation/
 ```
 
-The evaluation system covers both retrieval and generation.
-
-```text
-evaluation/
-├── models.py
-├── pipeline.py
-│
-├── datasets/
-│   └── benchmark.py
-│
-├── deepeval/
-│   ├── evaluator.py
-│   └── test_case.py
-│
-├── ragas/
-│   └── evaluator.py
-│
-├── generation/
-│   ├── context.py
-│   ├── faithfulness.py
-│   └── relevance.py
-│
-├── metrics/
-│   ├── answer_relevancy.py
-│   ├── contextual_precision.py
-│   ├── contextual_recall.py
-│   └── faithfulness.py
-│
-├── retrieval/
-│   ├── metrics.py
-│   ├── mrr.py
-│   ├── ndcg.py
-│   ├── precision.py
-│   └── recall.py
-│
-└── performance/
-    └── latency.py
-```
-
-## Evaluation dimensions
-
-### Retrieval
-
-```text
-Precision
-Recall
-MRR
-nDCG
-```
-
-### Generation
-
-```text
-Faithfulness
-Relevance
-Contextual Precision
-Contextual Recall
-```
-
-### Performance
-
-```text
-Latency
-```
-
-Evaluation is intended to provide measurable feedback for improving retrieval, generation, and adaptive decisions.
-
 ---
 
 # Self-Improvement
 
-The platform contains a self-improvement layer under:
+The platform contains a self-improvement subsystem designed to learn from research execution and evaluation signals.
+
+```text
+Research Execution
+       ↓
+Trace Collection
+       ↓
+Evaluation
+       ↓
+Feedback
+       ↓
+Learning Signals
+       ↓
+Strategy Improvement
+```
+
+The subsystem lives under:
 
 ```text
 backend/app/self_improvement/
 ```
 
-It combines:
-
-* Evaluation
-* Feedback
-* Trace collection
-* Retrieval learning
-* Routing learning
-* Prompt improvement
-* Strategy improvement
-* Stopping-policy improvement
-
-Conceptually:
-
-```text
-Research Query
-      ↓
-Retrieval
-      ↓
-Adaptive Decision
-      ↓
-Answer
-      ↓
-Evaluation
-      ↓
-Feedback
-      ↓
-Learning
-      ↓
-Improved Strategy
-```
+This creates a foundation for improving retrieval and research workflows using observed system behavior.
 
 ---
 
 # Observability
 
-Observability is treated as a dedicated platform capability.
+Observability is implemented as a separate platform concern.
 
-Implemented under:
+The monitoring layer includes:
+
+* Health checks
+* Structured logging
+* Metrics
+* Prometheus integration
+* Tracing
+* Alerts
+
+Located under:
 
 ```text
 backend/app/monitoring/
 ```
 
-with:
-
-```text
-monitoring/
-├── alerts.py
-├── health.py
-├── logging.py
-├── metrics.py
-├── prometheus.py
-└── tracing.py
-```
-
-Adaptive RAG also maintains its own decision and trace observability:
-
-```text
-adaptive_rag/observability/
-├── decisions.py
-├── diagnostics.py
-├── events.py
-└── trace.py
-```
-
-A research request can therefore be traced through:
+The goal is to make important stages measurable:
 
 ```text
 Request
   ↓
-Query Analysis
-  ↓
-Adaptive Decision
-  ↓
-Retrieval Strategy
+Planning
   ↓
 Retrieval
   ↓
-Ranking
+Reranking
   ↓
 Evidence
-  ↓
-Evaluation
   ↓
 Generation
   ↓
 Response
 ```
 
-Useful operational measurements include:
+This makes latency and execution behavior easier to inspect across the research pipeline.
 
-* Request latency
-* Retrieval latency
-* LLM latency
-* Retrieval strategy
-* Retrieval attempts
-* Retrieved document count
-* Evidence coverage
-* Confidence
-* Iteration count
-* Token usage
+---
+
+# Security
+
+Security components are organized separately from the research logic.
+
+Current areas include:
+
+* CORS
+* CSRF protection
+* Encryption
+* Security headers
+* Secret management
+
+Located under:
+
+```text
+backend/app/security/
+```
+
+The architecture keeps security concerns isolated so they can evolve independently from retrieval and research intelligence.
 
 ---
 
 # Frontend Architecture
 
-The web application is built with:
+The frontend is built with:
 
 * Next.js
 * React
@@ -1360,367 +882,173 @@ The web application is built with:
 * Tailwind CSS
 * TanStack Query
 
-Main application areas include:
+Major application areas include:
 
 ```text
-frontend/src/app/(dashboard)/
-
-├── assistant/
-├── collections/
-├── dashboard/
-├── explore/
-├── frontier/
-├── graph/
-├── papers/
-├── projects/
-└── reports/
+Dashboard
+│
+├── Assistant
+├── Collections
+├── Explore
+├── Frontier
+├── Graph
+├── Papers
+├── Projects
+└── Reports
 ```
 
-Domain modules include:
-
-```text
-frontend/src/
-
-├── adaptive-rag/
-├── collections/
-├── frontier/
-├── generation/
-├── graph/
-├── papers/
-├── projects/
-├── reports/
-├── research/
-├── retrieval/
-└── self-improvement/
-```
+The frontend communicates with the FastAPI backend through the `/api/v1` API layer.
 
 ---
 
 # Assistant Interface
 
-The primary research assistant interface is implemented through:
+The Assistant is the primary research interaction surface.
+
+It combines:
 
 ```text
-src/app/(dashboard)/assistant/page.tsx
-src/app/(dashboard)/components/assistant-page.tsx
+User Query
+    ↓
+Query Understanding
+    ↓
+Adaptive Retrieval
+    ↓
+Evidence
+    ↓
+LLM Synthesis
+    ↓
+Research Answer
 ```
 
-Adaptive RAG UI components live under:
-
-```text
-src/adaptive-rag/
-
-├── api.ts
-├── types.ts
-├── hooks/
-│   └── use-adaptive-rag.ts
-│
-└── components/
-    ├── adaptive-rag-panel.tsx
-    ├── confidence-meter.tsx
-    ├── evidence-evaluation.tsx
-    ├── rag-trace.tsx
-    ├── reasoning-status.tsx
-    ├── retrieval-attempt.tsx
-    ├── strategy-badge.tsx
-    └── strategy-selector.tsx
-```
-
-The interface is designed to expose retrieval state and evidence rather than hiding the entire process behind a single chat response.
+The interface is designed around researcher questions rather than exposing retrieval internals directly.
 
 ---
 
 # Research Interface
 
-The research domain is implemented under:
+The Research interface supports structured research workflows involving:
 
-```text
-src/research/
-```
+* Research planning
+* Multi-step questions
+* Evidence gathering
+* Cross-paper analysis
+* Citation-aware synthesis
+* Research reports
 
-with:
+The goal is to move from:
 
-```text
-src/research/
-├── api.ts
-├── types.ts
-└── hooks/
-    └── use-research.ts
-```
+> "Search for a paper"
 
-Research components include:
+toward:
 
-```text
-src/components/research/
-
-├── citation-list.tsx
-├── evidence-card.tsx
-├── evidence-list.tsx
-├── research-answer.tsx
-├── research-input.tsx
-├── research-page.tsx
-├── research-plan.tsx
-├── research-progress.tsx
-├── research-session.tsx
-├── research-task-list.tsx
-├── research-task.tsx
-└── verification-summary.tsx
-```
+> "Investigate a research question."
 
 ---
 
 # Frontier Interface
 
-The Research Frontier UI is implemented through:
+The Frontier interface exposes research trend and opportunity signals.
+
+Conceptually:
 
 ```text
-src/app/(dashboard)/frontier/page.tsx
-src/app/(dashboard)/components/frontier-page.tsx
+Research Corpus
+      ↓
+Topic Trends
+      ↓
+Novelty Signals
+      ↓
+Emerging Directions
+      ↓
+Research Gaps
+      ↓
+Frontier View
 ```
 
-Dedicated components include:
-
-```text
-src/app/(dashboard)/components/frontier/
-
-├── frontier-direction.tsx
-├── frontier-evidence.tsx
-├── frontier-overview.tsx
-├── novelty-card.tsx
-├── research-gap-card.tsx
-└── trend-card.tsx
-```
-
-The frontend data layer lives under:
-
-```text
-src/frontier/
-```
-
-and contains APIs, types, and frontier-related hooks.
+Frontend components are organized under the frontier feature area, including the frontier overview interface.
 
 ---
 
 # Graph Interface
 
-The research graph interface contains:
+The Graph interface provides a visual representation of relationships within the research corpus.
 
-```text
-src/app/(dashboard)/components/graph/
+It can be used to explore:
 
-├── graph-canvas.tsx
-├── graph-controls.tsx
-├── graph-details.tsx
-├── graph-edge.tsx
-├── graph-filters.tsx
-├── graph-legend.tsx
-├── graph-node.tsx
-└── graph-search.tsx
-```
+* Papers
+* Topics
+* Authors
+* Concepts
+* Methods
+* Related research
 
-This connects the visual research graph to the backend graph and research knowledge layers.
+This provides a complementary exploration mechanism to traditional search.
 
 ---
 
-# Research Reports
+# Reports
 
-Research reports are supported by backend and frontend layers.
+Research reports combine:
 
-### Backend
+* Research planning
+* Retrieved evidence
+* Source attribution
+* Cross-paper synthesis
+* Citations
+* Structured conclusions
 
-```text
-backend/app/reports/
-
-├── generator.py
-├── schemas.py
-└── service.py
-```
-
-### Frontend
-
-```text
-frontend/src/reports/
-
-├── api.ts
-├── types.ts
-└── hooks/
-```
-
-Report functionality includes:
-
-```text
-Report Builder
-Report Sections
-Report View
-Report Export
-Report List
-```
+The report layer is designed to turn multi-step retrieval into a reusable research artifact.
 
 ---
 
 # Collections
 
-Researchers can organize papers and research material through collections.
+Collections provide a way to organize research documents and create focused research corpora.
 
-Backend:
+A collection can act as a controlled knowledge space for:
 
-```text
-backend/app/collections/
-
-├── schemas.py
-└── service.py
-```
-
-Frontend:
-
-```text
-frontend/src/collections/
-
-├── api.ts
-├── types.ts
-└── hooks/
-```
-
-Collections remain separate from retrieval infrastructure, allowing research organization to evolve independently from search and RAG.
-
----
-
-# Data and Storage
-
-PostgreSQL stores structured application and research data.
-
-Important entities include:
-
-```text
-User
-Paper
-Author
-Document
-Section
-Chunk
-Topic
-Citation
-Method
-Dataset
-Venue
-
-ResearchProject
-ResearchSession
-ResearchExecution
-ResearchResult
-ResearchEvaluation
-ResearchFeedback
-ResearchTrace
-ResearchNote
-
-Collection
-CollectionItem
-Report
-```
-
-Vector indexing is implemented under:
-
-```text
-backend/app/indexing/
-```
-
-with:
-
-```text
-indexing/
-├── batch.py
-├── incremental.py
-├── pipeline.py
-│
-├── embeddings/
-│   ├── generator.py
-│   └── model.py
-│
-├── metadata/
-│   ├── schema.py
-│   └── store.py
-│
-└── vector_store/
-    ├── faiss_index.py
-    └── persistence.py
-```
-
-The retrieval layer combines vector and lexical search infrastructure.
+* Specific research topics
+* Research projects
+* Literature reviews
+* Experimental areas
+* Research teams
 
 ---
 
 # API Architecture
 
-API routes are implemented under:
-
-```text
-backend/app/api/routes/
-```
-
-Current route groups include:
-
-```text
-adaptive_rag.py
-assistant.py
-auth.py
-collections.py
-documents.py
-explore.py
-frontier.py
-graph.py
-health.py
-papers.py
-reports.py
-research.py
-retrieval.py
-self_improvement.py
-```
-
-The API is versioned under:
+The backend is built with **FastAPI** and exposes a versioned API.
 
 ```text
 /api/v1
 ```
 
-This provides a common backend interface for the web application and future research clients.
-
----
-
-# Security
-
-Security functionality is separated into dedicated modules.
+Major route groups include:
 
 ```text
-backend/app/security/
-
-├── cors.py
-├── csrf.py
-├── encryption.py
-├── headers.py
-└── secrets.py
+/api/v1/auth
+/api/v1/papers
+/api/v1/documents
+/api/v1/collections
+/api/v1/retrieval
+/api/v1/adaptive-rag
+/api/v1/research
+/api/v1/reports
+/api/v1/explore
+/api/v1/graph
+/api/v1/frontier
+/api/v1/self-improvement
+/api/v1/health
 ```
 
-API dependencies include:
+Interactive API documentation:
 
-```text
-backend/app/api/dependencies/
+https://ai-research-assistant-xtjz.onrender.com/docs
 
-├── auth.py
-├── current_user.py
-├── permissions.py
-└── rate_limit.py
-```
+OpenAPI schema:
 
-Middleware handles concerns such as:
-
-```text
-Authentication
-Exception Handling
-Logging
-Rate Limiting
-Request IDs
-Timing
-```
+https://ai-research-assistant-xtjz.onrender.com/openapi.json
 
 ---
 
@@ -1728,66 +1056,77 @@ Timing
 
 ## Backend
 
-| Technology            | Role                       |
-| --------------------- | -------------------------- |
-| Python 3.12           | Backend runtime            |
-| FastAPI               | REST API                   |
-| Pydantic              | Validation and schemas     |
-| SQLAlchemy            | Database access            |
-| PostgreSQL            | Persistent data            |
-| Redis                 | Caching and infrastructure |
-| Celery                | Background processing      |
-| FAISS                 | Vector search              |
-| BM25                  | Lexical retrieval          |
-| Sentence Transformers | Embeddings                 |
-| RAGAS                 | RAG evaluation             |
-| DeepEval              | Evaluation                 |
-| Prometheus            | Metrics                    |
-| LLM Providers         | Research generation        |
+| Technology            | Purpose                  |
+| --------------------- | ------------------------ |
+| Python                | Core backend language    |
+| FastAPI               | API framework            |
+| Pydantic              | Validation and schemas   |
+| SQLAlchemy            | Database access          |
+| PostgreSQL            | Persistent storage       |
+| Redis                 | Caching / infrastructure |
+| FAISS                 | Vector indexing          |
+| BM25                  | Lexical retrieval        |
+| Sentence Transformers | Embeddings               |
+| Cross-Encoder         | Reranking                |
+| RAGAS                 | RAG evaluation           |
+| DeepEval              | LLM evaluation           |
+| Prometheus            | Metrics                  |
+| Docker                | Containerization         |
 
 ## Frontend
 
-| Technology     | Role                      |
-| -------------- | ------------------------- |
-| Next.js        | Web application           |
-| React          | UI                        |
-| TypeScript     | Type safety               |
-| Tailwind CSS   | Styling                   |
-| TanStack Query | Data fetching and caching |
+| Technology     | Purpose                 |
+| -------------- | ----------------------- |
+| Next.js        | Web application         |
+| React          | UI                      |
+| TypeScript     | Type safety             |
+| Tailwind CSS   | Styling                 |
+| TanStack Query | Server-state management |
 
-## Infrastructure
+## Research Infrastructure
 
-| Technology     | Role                |
-| -------------- | ------------------- |
-| Docker         | Containerization    |
-| Docker Compose | Local orchestration |
-| GitHub Actions | CI                  |
-| Vercel         | Frontend deployment |
-| Render         | Backend deployment  |
+| Component        | Role                           |
+| ---------------- | ------------------------------ |
+| arXiv            | Research discovery             |
+| OpenAlex         | Scholarly metadata             |
+| Semantic Scholar | Research metadata              |
+| Crossref         | Scholarly metadata             |
+| FAISS            | Dense vector search            |
+| BM25             | Lexical search                 |
+| Knowledge Graph  | Relationship-aware exploration |
 
 ---
 
 # Local Development
 
-## Clone
+## 1. Clone the Repository
 
 ```bash
 git clone https://github.com/garimakumari44/ai_research_assistant.git
-cd ai_research_assistant/research-assistant
+cd ai_research_assistant
+```
+
+The application source is located under:
+
+```text
+research-assistant/
 ```
 
 ---
 
-## Backend
+## 2. Backend Setup
+
+```bash
+cd research-assistant/backend
+```
 
 Create a virtual environment:
 
 ```bash
-cd backend
 python -m venv .venv
 ```
 
-### Windows
+Activate on Windows:
 
 ```powershell
 .venv\Scripts\Activate.ps1
@@ -1797,12 +1136,6 @@ Install dependencies:
 
 ```bash
 pip install -r requirements.txt
-```
-
-Configure environment variables using:
-
-```text
-backend/.env.example
 ```
 
 Run the API:
@@ -1817,79 +1150,67 @@ Backend:
 http://localhost:8010
 ```
 
-Swagger:
+API documentation:
 
 ```text
 http://localhost:8010/docs
 ```
 
-OpenAPI:
-
-```text
-http://localhost:8010/openapi.json
-```
-
 ---
 
-# Frontend
+## 3. Frontend Setup
 
-From the repository's `research-assistant` directory:
+Open another terminal:
 
 ```bash
-cd frontend
+cd research-assistant/frontend
+```
+
+Install dependencies:
+
+```bash
 npm install
+```
+
+Run the development server:
+
+```bash
 npm run dev
 ```
 
-The development application runs at:
+Frontend:
 
 ```text
 http://localhost:3000
 ```
 
-Configure the frontend API environment according to the provided environment configuration.
-
 ---
 
 # Docker
 
-The backend contains:
+The project can also be run using Docker-based infrastructure.
+
+The application architecture is designed around containerized backend and frontend services together with supporting infrastructure.
+
+Typical development topology:
 
 ```text
-backend/Dockerfile
-backend/docker-compose.yml
-```
-
-The frontend contains:
-
-```text
-frontend/Dockerfile
-```
-
-The production-oriented application topology is:
-
-```text
-                         Browser
-                            │
-                            ↓
-                       Next.js UI
-                            │
-                            ↓
-                       FastAPI API
-                            │
-              ┌─────────────┼─────────────┐
-              ↓             ↓             ↓
-         PostgreSQL       Redis       Retrieval
-                                         │
-                                  ┌──────┴──────┐
-                                  ↓             ↓
-                                FAISS          BM25
-                                  │             │
-                                  └──────┬──────┘
-                                         ↓
-                                      Evidence
-                                         ↓
-                                    Research
+                    Browser
+                       │
+                       ▼
+                Next.js Frontend
+                       │
+                       ▼
+                 FastAPI Backend
+                       │
+          ┌────────────┼────────────┐
+          ▼            ▼            ▼
+      PostgreSQL     Redis        FAISS
+                                     
+                       │
+                       ▼
+                LLM / Embedding
+                  Providers
 ```
 
 ---
@@ -1902,14 +1223,13 @@ ai_research_assistant/
 ├── README.md
 │
 ├── docs/
-│   ├── explore.md
 │   └── img/
-│       ├── AI Research Assistant System Architecture.png
 │       ├── adaptive_rag.png
 │       ├── adaptive_rag (2).png
+│       ├── AI Research Assistant System Architecture.png
+│       ├── archi_2.png
 │       ├── Assistant — Adaptive RAG & LLM Research Architecture (1).png
 │       ├── assistant.png
-│       ├── archi_2.png
 │       ├── explore.png
 │       ├── explore (2).png
 │       ├── Explore Adaptive Retrieval Architecture.png
@@ -1922,422 +1242,416 @@ ai_research_assistant/
     │
     ├── backend/
     │   ├── app/
-    │   │   ├── adaptive_rag/
     │   │   ├── api/
-    │   │   ├── assistant/
-    │   │   ├── cache/
-    │   │   ├── collections/
-    │   │   ├── core/
-    │   │   ├── db/
-    │   │   ├── documents/
+    │   │   ├── adaptive_rag/
     │   │   ├── evaluation/
-    │   │   ├── explore/
     │   │   ├── frontier/
-    │   │   ├── generation/
     │   │   ├── graph/
-    │   │   ├── indexing/
     │   │   ├── ingestion/
     │   │   ├── knowledge/
     │   │   ├── llm/
-    │   │   ├── middleware/
     │   │   ├── monitoring/
-    │   │   ├── papers/
-    │   │   ├── processing/
-    │   │   ├── rate_limit/
-    │   │   ├── reports/
-    │   │   ├── repositories/
     │   │   ├── research/
     │   │   ├── retrieval/
-    │   │   ├── schemas/
     │   │   ├── security/
-    │   │   ├── self_improvement/
-    │   │   ├── services/
-    │   │   ├── users/
-    │   │   └── workers/
+    │   │   └── self_improvement/
     │   │
-    │   ├── alembic/
-    │   ├── storage/
-    │   ├── Dockerfile
-    │   ├── docker-compose.yml
+    │   ├── tests/
     │   ├── requirements.txt
-    │   └── alembic.ini
+    │   └── ...
     │
     └── frontend/
-        ├── src/
-        │   ├── adaptive-rag/
-        │   ├── app/
-        │   ├── collections/
-        │   ├── components/
-        │   ├── frontier/
-        │   ├── generation/
-        │   ├── graph/
-        │   ├── hooks/
-        │   ├── lib/
-        │   ├── papers/
-        │   ├── projects/
-        │   ├── providers/
-        │   ├── reports/
-        │   ├── research/
-        │   ├── retrieval/
-        │   ├── self-improvement/
-        │   └── types/
-        │
+        ├── app/
+        ├── components/
+        ├── lib/
         ├── public/
+        ├── types/
         ├── Dockerfile
         ├── package.json
-        ├── next.config.ts
-        └── tsconfig.json
+        └── ...
+```
+
+---
+
+# Backend Architecture
+
+```text
+backend/
+└── app/
+    │
+    ├── api/
+    │   └── routes/
+    │       ├── adaptive_rag
+    │       ├── assistant
+    │       ├── auth
+    │       ├── collections
+    │       ├── documents
+    │       ├── explore
+    │       ├── frontier
+    │       ├── graph
+    │       ├── health
+    │       ├── papers
+    │       ├── reports
+    │       ├── research
+    │       ├── retrieval
+    │       └── self_improvement
+    │
+    ├── ingestion/
+    │   ├── documents/
+    │   ├── processing/
+    │   └── providers/
+    │
+    ├── knowledge/
+    │   ├── chunking/
+    │   ├── documents/
+    │   ├── embeddings/
+    │   └── indexing/
+    │
+    ├── retrieval/
+    │   ├── query/
+    │   ├── sources/
+    │   ├── dense/
+    │   ├── bm25/
+    │   ├── hybrid/
+    │   ├── ranking/
+    │   ├── reranking/
+    │   ├── compression/
+    │   ├── evidence/
+    │   └── filters/
+    │
+    ├── adaptive_rag/
+    │   ├── controller/
+    │   ├── planner/
+    │   ├── router/
+    │   ├── orchestration/
+    │   ├── policies/
+    │   ├── routing/
+    │   ├── strategies/
+    │   ├── evaluation/
+    │   ├── evidence/
+    │   ├── observability/
+    │   └── self_reflection/
+    │
+    ├── research/
+    │   ├── planner/
+    │   ├── pipeline/
+    │   ├── citation/
+    │   ├── evidence/
+    │   ├── retrieval/
+    │   ├── reports/
+    │   └── synthesis/
+    │
+    ├── graph/
+    │   ├── builder/
+    │   ├── extractors/
+    │   ├── models/
+    │   ├── queries/
+    │   ├── schemas/
+    │   ├── service/
+    │   └── traversal/
+    │
+    ├── frontier/
+    │   ├── detector.py
+    │   ├── gaps.py
+    │   ├── novelty.py
+    │   ├── service.py
+    │   └── trends.py
+    │
+    ├── evaluation/
+    │
+    ├── self_improvement/
+    │
+    ├── monitoring/
+    │
+    ├── security/
+    │
+    └── llm/
+        └── providers/
+            ├── openai
+            ├── openrouter
+            ├── gemini
+            └── ollama
 ```
 
 ---
 
 # Researcher Workflow
 
-The intended researcher workflow is:
+The intended workflow is:
 
 ```text
-                         RESEARCHER
-                             │
-                             ↓
-                       Discover Papers
-                             │
-                             ↓
-                          Explore
-                             │
-                             ↓
-                       Select Context
-                             │
-                             ↓
-                       Ask Assistant
-                             │
-                             ↓
-                        Adaptive RAG
-                             │
-                             ↓
-                          Evidence
-                             │
-                             ↓
-                     Research Synthesis
-                             │
-                             ↓
-                         Citations
-                             │
-                             ↓
-                          Report
-                             │
-                             ↓
-                 Research Frontier
-                             │
-                             ↓
-                    Trends / Novelty
-                    / Gaps / Signals
+1. Discover
+      ↓
+2. Collect
+      ↓
+3. Organize
+      ↓
+4. Search
+      ↓
+5. Retrieve
+      ↓
+6. Investigate
+      ↓
+7. Validate Evidence
+      ↓
+8. Connect Research
+      ↓
+9. Synthesize
+      ↓
+10. Identify Emerging Directions
+      ↓
+11. Generate Research Output
+```
+
+The platform therefore combines the functionality of:
+
+```text
+Research Search
+       +
+RAG System
+       +
+Research Assistant
+       +
+Knowledge Graph
+       +
+Research Intelligence
+       +
+Frontier Analysis
 ```
 
 ---
 
 # Core Design Principles
 
-## 1. Retrieval is reusable infrastructure
+## 1. Retrieval First
 
-Retrieval is not coupled to a single interface.
+Generation should operate over retrieved research evidence rather than relying entirely on model memory.
 
-```text
-                  Retrieval
-                     ↑
-       ┌─────────────┼─────────────┐
-       ↑             ↑             ↑
-   Assistant      Research      Frontier
-       ↑             ↑             ↑
-     Explore        Graph      Other Clients
-```
+## 2. Evidence as a First-Class Object
 
----
+Claims should be connected to supporting research evidence.
 
-## 2. Adaptive RAG makes retrieval decisions
+## 3. Adaptive Retrieval
 
-```text
-Query
- ↓
-Analyze
- ↓
-Plan
- ↓
-Select Strategy
- ↓
-Retrieve
- ↓
-Evaluate
- ↓
-Continue / Stop
-```
+Different research questions require different retrieval strategies.
 
-Adaptive RAG is therefore a decision and orchestration layer, not another copy of the retrieval engine.
+## 4. Modular Architecture
 
----
+Ingestion, knowledge, retrieval, research, frontier intelligence, evaluation, and monitoring remain independently extensible.
 
-## 3. Evidence comes before synthesis
+## 5. Evaluation-Driven Development
 
-```text
-Retrieve
-   ↓
-Evidence
-   ↓
-Validate
-   ↓
-Synthesize
-```
+Retrieval and generation quality should be measurable.
 
-This creates a clear separation between finding context and generating research conclusions.
+## 6. Observable AI Systems
 
----
+Research execution should expose enough telemetry to understand system behavior and latency.
 
-## 4. Frontier Intelligence consumes existing intelligence
+## 7. Provider Independence
 
-The Frontier layer builds on:
+LLM and embedding providers should remain replaceable through abstraction layers.
 
-```text
-Knowledge
-    +
-Retrieval
-    +
-Evidence
-    +
-Research
-```
+## 8. Research-Oriented UX
 
-rather than maintaining an isolated research database and retrieval pipeline.
-
----
-
-## 5. Evaluation closes the loop
-
-```text
-Research
-   ↓
-Evaluation
-   ↓
-Feedback
-   ↓
-Learning
-   ↓
-Improvement
-```
+The interface should help researchers investigate questions rather than simply return search results.
 
 ---
 
 # Long-Term Architecture
 
-The platform can be summarized as:
+The platform is designed to evolve from a research assistant into a broader research intelligence system.
 
 ```text
-                    FRONTIER INTELLIGENCE
-                              ↑
-              ┌───────────────┼───────────────┐
-              ↑               ↑               ↑
-          KNOWLEDGE       RETRIEVAL        RESEARCH
-              ↑               ↑               ↑
-              └───────────────┼───────────────┘
-                              ↑
-                          INGESTION
+                    Research Corpus
+                           │
+                           ▼
+                    Knowledge Layer
+                           │
+             ┌─────────────┼─────────────┐
+             ▼             ▼             ▼
+         Retrieval      Graph        Research
+             │             │             │
+             └─────────────┼─────────────┘
+                           ▼
+                    Adaptive RAG
+                           │
+                           ▼
+                   Evidence Engine
+                           │
+                           ▼
+                 Research Intelligence
+                           │
+                           ▼
+                 Frontier Intelligence
+                           │
+                           ▼
+                  Researcher Workflow
 ```
 
-The complete progression is:
-
-```text
-Research Sources
-       ↓
-Research Corpus
-       ↓
-Knowledge
-       ↓
-Retrieval
-       ↓
-Adaptive RAG
-       ↓
-Evidence
-       ↓
-Research Intelligence
-       ↓
-Frontier Intelligence
-       ↓
-Learning
-```
+The architecture is intentionally designed so that additional research domains, data providers, retrieval strategies, models, and evaluation methods can be added without redesigning the entire platform.
 
 ---
 
 # Current Research Focus
 
-The current platform is focused on **AI research papers**.
+The current platform is primarily focused on **AI research papers**.
 
-The architecture can support research across areas such as:
-
-* Large Language Models
-* Retrieval-Augmented Generation
-* AI Agents
-* Multi-Agent Systems
-* Reinforcement Learning
-* Natural Language Processing
-* Computer Vision
-* Generative AI
-* Machine Learning
-* Information Retrieval
-* AI Evaluation
-
-The underlying ingestion, knowledge, retrieval, evidence, and research architecture is designed to make additional research domains possible without replacing the core platform.
+The architecture is designed to support broader research corpora over time, including additional scholarly domains and specialized knowledge sources.
 
 ---
 
-# Research Frontier Direction
+# Frontier Direction
 
-The long-term frontier pipeline is:
+The frontier intelligence subsystem is intended to progressively support deeper analysis of:
 
-```text
-Topic History
-      ↓
-Trend Engine
-      ↓
-Research Signals
-      ↓
-Novelty
-      ↓
-Frontier Detection
-      ↓
-Forecast
-      ↓
-Evidence Verification
-      ↓
-Research Opportunities
-      ↓
-Frontier Snapshot
-      ↓
-FastAPI
-      ↓
-Research Frontier UI
-```
+* Emerging research topics
+* Topic growth
+* Novelty
+* Research gaps
+* Cross-topic convergence
+* Method evolution
+* Research opportunities
 
-The UI consumes the output of this pipeline rather than becoming the source of the intelligence.
-
-This keeps frontier analysis connected to:
-
-```text
-Actual research data
-        +
-Research graph
-        +
-Retrieval results
-        +
-Evidence
-        +
-Measurable signals
-```
-
----
-
-# Project Vision
-
-The goal is to move beyond a conventional research chatbot.
-
-Instead of answering only:
-
-> **“What does this paper say?”**
-
-the platform is designed around a broader research workflow:
-
-```text
-What has been published?
-          ↓
-What does the literature say?
-          ↓
-How are papers connected?
-          ↓
-What evidence supports the claims?
-          ↓
-How is a topic evolving?
-          ↓
-Where are research gaps?
-          ↓
-What emerging directions can be identified?
-```
-
-The foundation is:
-
-```text
-Papers
-  ↓
-Knowledge
-  ↓
-Retrieval
-  ↓
-Adaptive RAG
-  ↓
-Evidence
-  ↓
-Research
-  ↓
-Frontier
-  ↓
-Learning
-```
+As the underlying research corpus grows, these signals can become increasingly useful for understanding how research areas evolve.
 
 ---
 
 # Project Status
 
-The current system is being developed as a production-oriented research platform with an initial focus on **AI research papers**.
+### Implemented
 
-The core architecture already includes:
+* Research paper ingestion
+* Research metadata normalization
+* Document processing
+* Chunking
+* Embeddings
+* Vector indexing
+* BM25 retrieval
+* Hybrid retrieval
+* Reciprocal Rank Fusion
+* Reranking
+* Adaptive RAG architecture
+* Evidence handling
+* Research planning
+* Research synthesis
+* Knowledge graph infrastructure
+* Frontier intelligence foundation
+* Evaluation infrastructure
+* Self-improvement infrastructure
+* Monitoring and observability
+* FastAPI backend
+* Next.js frontend
+* Docker-based deployment architecture
 
-```text
-✓ Research ingestion
-✓ Paper knowledge representation
-✓ Hybrid retrieval
-✓ Adaptive RAG
-✓ Evidence processing
-✓ Research synthesis
-✓ Knowledge graph
-✓ Research reports
-✓ Frontier intelligence
-✓ Evaluation
-✓ Self-improvement
-✓ Observability
-✓ Security controls
-✓ Dockerized services
-✓ CI infrastructure
-✓ Web application
-✓ Deployed frontend
-✓ Deployed backend
-```
+### Active Development
+
+The platform continues to evolve around:
+
+* More robust research evaluation
+* Expanded frontier intelligence
+* Improved graph-aware retrieval
+* More research providers
+* Better evidence validation
+* More advanced self-improvement workflows
+* Expanded observability
+* Research workflow refinement
 
 ---
 
-# Built With
+# Project Vision
+
+The long-term goal is to build an AI research system that does more than retrieve papers.
+
+It should help researchers:
 
 ```text
-Python
-FastAPI
-PostgreSQL
-Redis
-FAISS
-BM25
-Sentence Transformers
-RAGAS
-DeepEval
-Next.js
-React
-TypeScript
-Tailwind CSS
-Docker
-GitHub Actions
+Discover
+   ↓
+Understand
+   ↓
+Connect
+   ↓
+Evaluate
+   ↓
+Synthesize
+   ↓
+Identify Gaps
+   ↓
+Explore Emerging Directions
 ```
+
+The core idea is to combine **retrieval infrastructure, adaptive reasoning, evidence grounding, knowledge graphs, evaluation, and research intelligence** into a single extensible research platform.
+
+---
+
+# Why This Architecture
+
+Traditional research search systems generally optimize for:
+
+```text
+Query → Similar Papers
+```
+
+This platform is designed around:
+
+```text
+Research Question
+        ↓
+Question Understanding
+        ↓
+Adaptive Retrieval
+        ↓
+Evidence
+        ↓
+Validation
+        ↓
+Cross-Paper Reasoning
+        ↓
+Research Synthesis
+        ↓
+Knowledge Connections
+        ↓
+Frontier Signals
+```
+
+This architectural shift allows the platform to move from a conventional search experience toward a more complete **AI research workflow**.
+
+---
+
+# Repository
+
+GitHub:
+
+https://github.com/garimakumari44/ai_research_assistant
+
+Live application:
+
+https://ai-research-assistant-wine.vercel.app
+
+API:
+
+https://ai-research-assistant-xtjz.onrender.com
+
+---
+
+# Author
+
+**Garima Kumari**
+
+B.A. (Hons.) Economics
+Miranda House, University of Delhi
+
+Interested in:
+
+* AI Engineering
+* Machine Learning
+* NLP
+* Reinforcement Learning
+* Multi-Agent Systems
+* AI Research Infrastructure
 
 ---
 
 <p align="center">
-  <strong>AI Research Assistant</strong>
-  <br/>
-  Research Papers → Evidence → Adaptive Intelligence → Frontier Discovery
-</p>
-
-<p align="center">
-  Built for AI research workflows with Python, FastAPI, Next.js, PostgreSQL, FAISS, BM25, and Adaptive RAG.
+  Built as a production-oriented AI research platform.
 </p>
